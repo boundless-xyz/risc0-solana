@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-solana_examples = "J1VvJRzAXd7gHRdjz3rBEBZafwcJn3qzpKDjFU6yYuLj"
+solana_examples = "BvGMg5rQDzVyeMjabk7sY8xeZvzTxJBf9iikRsJVywdj"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

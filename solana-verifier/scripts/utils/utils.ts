@@ -35,7 +35,7 @@ import {
   getU32Codec,
   Lamports,
   lamports,
-  ITransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayer,
   TransactionMessageWithBlockhashLifetime,
 } from "@solana/kit";
 import {
@@ -109,7 +109,7 @@ export enum Programs {
 export const LAMPORTS_PER_SOL = 1_000_000_000n;
 
 type BlockhashTransaction = BaseTransactionMessage &
-  ITransactionMessageWithFeePayer<string> &
+  TransactionMessageWithFeePayer<string> &
   TransactionMessageWithBlockhashLifetime;
 
 /**
@@ -144,15 +144,19 @@ export interface SendTransactionParams<
  * * Requires a valid feePayer with sufficient balance
  * * Uses latest blockhash for transaction lifetime
  */
-export async function sendTransaction<
-  TTransaction extends BlockhashTransaction,
->({
+export async function sendTransaction({
   rpc,
   rpcSubscriptions,
   feePayer,
   instruction: instruction,
   commitment = "confirmed",
-}: SendTransactionParams<TTransaction>): Promise<void> {
+}: {
+  rpc: Rpc<SolanaRpcApi>;
+  rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
+  feePayer: TransactionPartialSigner | TransactionSigner;
+  instruction: any; // Will be typed properly by the transaction building process
+  commitment?: Commitment;
+}): Promise<void> {
   // Get the latest blockhash
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
@@ -165,7 +169,7 @@ export async function sendTransaction<
   // Create the transaction
   const baseTransaction = createTransactionMessage({
     version: 0,
-  }) as TTransaction;
+  });
   const transactionWithBlockhash = setTransactionMessageLifetimeUsingBlockhash(
     latestBlockhash,
     baseTransaction
@@ -173,7 +177,7 @@ export async function sendTransaction<
   const transactionWithFeePayer = setTransactionMessageFeePayerSigner(
     feePayer,
     transactionWithBlockhash
-  ) as TTransaction;
+  );
   const finalTransaction = appendTransactionMessageInstruction(
     instruction,
     transactionWithFeePayer

@@ -8,6 +8,7 @@ node_modules
 test-ledger
 .yarn
 .idea
-*.lock
 *.pb
 package-lock.json
+**/.env
+**/.env.*

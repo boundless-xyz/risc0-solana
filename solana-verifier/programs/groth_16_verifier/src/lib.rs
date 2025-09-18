@@ -15,11 +15,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::alt_bn128::prelude::*;
 use anchor_lang::solana_program::hash::hashv;
 use anchor_lang::system_program;
 use error::VerifierError;
 use hex_literal::hex;
+use solana_bn254::prelude::*;
 
 mod error;
 mod vk;
@@ -29,18 +29,14 @@ pub mod client;
 
 pub use vk::{VerificationKey, VERIFICATION_KEY};
 
-declare_id!("CA4wbHHhe4bxakLB4t21uQKWSjpGYciNKJjJS26XRnmi");
+declare_id!("THq1qFYQoh7zgcjXoMXduDBqiZRCPeg3PvvMbrVQUge");
+
+include!(concat!(env!("OUT_DIR"), "/control_ids.rs"));
 
 // Base field modulus 'q' for BN254
 // https://docs.rs/ark-bn254/latest/ark_bn254/
 pub const BASE_FIELD_MODULUS_Q: [u8; 32] =
     hex!("30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD47");
-// REF: https://github.com/risc0/risc0/blob/main/risc0/circuit/recursion/src/control_id.rs#L47
-pub const ALLOWED_CONTROL_ROOT: [u8; 32] =
-    hex!("8cdad9242664be3112aba377c5425a4df735eb1c6966472b561d2855932c0469");
-// REF: https://github.com/risc0/risc0/blob/main/risc0/circuit/recursion/src/control_id.rs#L51
-pub const BN254_IDENTITY_CONTROL_ID: [u8; 32] =
-    hex!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
 // SHA256('risc0.Output')
 pub const OUTPUT_TAG: [u8; 32] =
     hex!("77eafeb366a78b47747de0d7bb176284085ff5564887009a5be63da32d3559d4");
@@ -272,11 +268,16 @@ fn subtract_be_bytes(a: &mut [u8; 32], b: &[u8; 32]) {
 }
 
 #[cfg(test)]
+mod v3_test_receipt;
+
+#[cfg(test)]
 mod test_groth16_lib {
+
     use super::client::*;
     use super::*;
     use risc0_zkvm::sha::Digestible;
     use risc0_zkvm::Receipt;
+    use v3_test_receipt::{FIB_ID as IMG_ID, FIB_RECEIPT as RECEIPT};
 
     // Reference base field modulus for BN254
     // https://docs.rs/ark-bn254/latest/ark_bn254/
@@ -284,8 +285,7 @@ mod test_groth16_lib {
         "21888242871839275222246405745257275088696311157297823662689037894645226208583";
 
     fn load_receipt_and_extract_data() -> (Receipt, Proof, PublicInputs<5>) {
-        let receipt_json_str = include_bytes!("../test/data/receipt.json");
-        let receipt: Receipt = serde_json::from_slice(receipt_json_str).unwrap();
+        let receipt: Receipt = bincode::deserialize(RECEIPT).unwrap();
 
         let claim_digest = receipt
             .inner
@@ -359,9 +359,12 @@ mod test_groth16_lib {
 
     #[test]
     pub fn test_verify() {
-        let (_, proof, public_inputs) = load_receipt_and_extract_data();
+        let (receipt, proof, public_inputs) = load_receipt_and_extract_data();
+        receipt
+            .verify(IMG_ID)
+            .expect("sanity check verification of receipt failed");
         let res = verify_groth16(&proof, &public_inputs);
-        assert!(res.is_ok(), "Verification failed");
+        assert!(res.is_ok(), "Contract verification failed");
     }
 
     #[test]
@@ -388,12 +391,6 @@ mod test_groth16_lib {
     fn test_claim_digest() {
         let (receipt, _, _) = load_receipt_and_extract_data();
         let actual_claim_digest = receipt.claim().unwrap().digest();
-
-        // image id of receipt.json
-        const IMG_ID: [u32; 8] = [
-            18688597, 1673543865, 1491143371, 721664238, 865920440, 525156886, 2498763974,
-            799689043,
-        ];
 
         let mut image_id = [0u8; 32];
         for (i, &val) in IMG_ID.iter().enumerate() {
