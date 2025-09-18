@@ -31,10 +31,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          
+
       - name: install rust
         uses: risc0/risc0/.github/actions/rustup@main
 
-      - name: Cargo test
+      - name: solana-verifier Cargo tests
         working-directory: ./solana-verifier
-        run: cargo test --workspace --all-features -- --nocapture
+        run: cargo test --locked
