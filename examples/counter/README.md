@@ -70,7 +70,7 @@ yarn run deploy
 4. Build and Deploy the Example Project:
 ```bash
 # Go to the Solana Examples directory for everything else
-cd examples/counter
+cd ../examples/counter
 
 # Sync keys for local deploy
 anchor keys sync
