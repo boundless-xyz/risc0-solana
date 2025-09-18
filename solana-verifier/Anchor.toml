@@ -5,15 +5,15 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-groth_16_verifier = "CA4wbHHhe4bxakLB4t21uQKWSjpGYciNKJjJS26XRnmi"
-test_bad_verifier = "DAkJzHMBpV7k4EMEWXfd6vva9PRM4Fcr413Xqz7FtgXY"
-verifier_router = "CkiFTJ5vbyyVfMfstEV8Zo4ALPkGuVQURUFky5mBNhcL"
+groth_16_verifier = "THq1qFYQoh7zgcjXoMXduDBqiZRCPeg3PvvMbrVQUge"
+test_bad_verifier = "6UwNJdV4Q64iWHWrsTTonwhTFWTT3wg8RtzLX9fchp5W"
+verifier_router = "6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

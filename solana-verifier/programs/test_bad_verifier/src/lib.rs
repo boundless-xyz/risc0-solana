@@ -18,7 +18,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 use groth_16_verifier::Proof;
 
-declare_id!("DAkJzHMBpV7k4EMEWXfd6vva9PRM4Fcr413Xqz7FtgXY");
+declare_id!("6UwNJdV4Q64iWHWrsTTonwhTFWTT3wg8RtzLX9fchp5W");
 
 #[error_code]
 pub enum VerifierError {

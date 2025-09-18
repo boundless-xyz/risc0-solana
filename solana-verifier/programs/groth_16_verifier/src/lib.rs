@@ -15,11 +15,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::alt_bn128::prelude::*;
 use anchor_lang::solana_program::hash::hashv;
 use anchor_lang::system_program;
 use error::VerifierError;
 use hex_literal::hex;
+use solana_bn254::prelude::*;
 
 mod error;
 mod vk;
@@ -29,7 +29,7 @@ pub mod client;
 
 pub use vk::{VerificationKey, VERIFICATION_KEY};
 
-declare_id!("CA4wbHHhe4bxakLB4t21uQKWSjpGYciNKJjJS26XRnmi");
+declare_id!("THq1qFYQoh7zgcjXoMXduDBqiZRCPeg3PvvMbrVQUge");
 
 // Base field modulus 'q' for BN254
 // https://docs.rs/ark-bn254/latest/ark_bn254/
