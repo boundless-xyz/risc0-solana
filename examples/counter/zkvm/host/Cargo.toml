@@ -6,9 +6,9 @@ edition = "2021"
 [dependencies]
 methods = { path = "../methods" }
 shared = { path = "../../shared" }
-solana-examples = { path = "../../programs/solana-examples", features = ["no-entrypoint"] }
-groth_16_verifier = { path = "../../../solana-verifier/programs/groth_16_verifier", features = ["no-entrypoint", "client"]}
-verifier_router = { path = "../../../solana-verifier/programs/verifier_router", features = ["no-entrypoint"]}
+solana-counter = { path = "../../programs/solana-counter", features = ["no-entrypoint"] }
+groth_16_verifier = { path = "../../../../solana-verifier/programs/groth_16_verifier", features = ["no-entrypoint", "client"]}
+verifier_router = { path = "../../../../solana-verifier/programs/verifier_router", features = ["no-entrypoint"]}
 
 risc0-zkvm = { version = "3.0.3", default-features = false, features = ["prove"]}
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

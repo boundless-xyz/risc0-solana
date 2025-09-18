@@ -70,7 +70,7 @@ yarn run deploy
 4. Build and Deploy the Example Project:
 ```bash
 # Go to the Solana Examples directory for everything else
-cd solana-examples
+cd examples/counter
 
 # Sync keys for local deploy
 anchor keys sync
@@ -86,7 +86,7 @@ anchor deploy
 
 ```bash
 # Go to the Client program directory
-cd hello-world
+cd zkvm
 
 # Run the example program
 RUST_LOG=info cargo run
@@ -122,19 +122,19 @@ This will:
 
 ## Key Components
 
-### Solana Program (`programs/solana-examples/src/lib.rs`)
+### Solana Program (`programs/solana-counter/src/lib.rs`)
 Handles on-chain state and verification logic:
 - Stores current nonce and program image ID
 - Verifies proofs through Verifier Router
 - Updates state when proofs are valid
 
-### Guest Program (`hello-world/methods/guest/src/main.rs`)
+### Guest Program (`zkvm/methods/guest/src/main.rs`)
 Simple program that:
 - Takes current nonce as input
 - Increments nonce value
 - Outputs incremented value and public key into the proofs journal
 
-### Host Program (`hello-world/host/src/main.rs`)
+### Host Program (`zkvm/host/src/main.rs`)
 Orchestrates the proof system:
 - Initializes the Solana example program if not currently initialized
 - Reads current state from Solana

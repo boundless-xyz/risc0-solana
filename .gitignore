@@ -11,3 +11,5 @@ test-ledger
 *.lock
 *.pb
 package-lock.json
+**/.env
+**/.env.*

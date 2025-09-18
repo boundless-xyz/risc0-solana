@@ -1,12 +1,12 @@
 [package]
-name = "solana-examples"
+name = "solana-counter"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "solana_examples"
+name = "solana_counter"
 
 [features]
 default = []
@@ -18,5 +18,5 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
-verifier_router = { path = "../../../solana-verifier/programs/verifier_router", features = ["cpi"] }
+verifier_router = { path = "../../../../solana-verifier/programs/verifier_router", features = ["cpi"] }
 shared = { path = "../../shared" }

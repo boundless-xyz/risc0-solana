@@ -23,8 +23,8 @@ Our core verifier infrastructure allows secure on-chain verification of RISC Zer
 
 We provide several supporting libraries to help developers integrate with the verifier:
 
-- [Groth16 Verifier][verifier]: Groth16 proof verification using Solana `alt-bn254` system calls
-- [Ownable Library][ownable]: Secure two-step ownership transfer for Solana programs
+- [Groth16 Verifier][solana-verifier]: Groth16 proof verification using Solana `alt-bn254` system calls
+- [Ownable Library][solana-ownable]: Secure two-step ownership transfer for Solana programs
 - [Example Code][examples]: Integration code demonstrating verifier usage
 
 ## Getting Started

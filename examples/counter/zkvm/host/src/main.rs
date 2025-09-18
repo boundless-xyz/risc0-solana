@@ -29,7 +29,7 @@ use borsh::to_vec;
 use groth_16_verifier::client::receipt_to_proof;
 use risc0_zkvm::sha::Digestible;
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts};
-use solana_examples::{accounts, instruction, ProgramData};
+use solana_counter::{accounts, instruction, ProgramData};
 use std::sync::Arc;
 use tracing::{debug, info, trace};
 
@@ -255,14 +255,14 @@ async fn main() {
 
     debug!("Airdrop was completed for address: {user_address}");
 
-    let solana_example_address = solana_examples::ID;
+    let solana_example_address = solana_counter::ID;
     debug!("Interacting with solana example program at address: {solana_example_address}");
 
     let example_program = client
-        .program(solana_examples::ID)
+        .program(solana_counter::ID)
         .expect("Was unable to construct a client for the solana program on localnet.");
 
-    let (program_data_address, _) = Pubkey::find_program_address(&[b"data"], &solana_examples::ID);
+    let (program_data_address, _) = Pubkey::find_program_address(&[b"data"], &solana_counter::ID);
 
     debug!("Account Program Data PDA Address is: {program_data_address}");
 
