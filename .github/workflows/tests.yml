@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RUST_BACKTRACE: "1"
+
+jobs:
+  test:
+    runs-on: [ self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}" ]
+    strategy:
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            feature: default
+            device: cpu
+    steps:
+      - name: clone repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@main
+
+      - name: Cargo test
+        working-directory: ./solana-verifier
+        run: cargo test --workspace --all-features -- --nocapture
