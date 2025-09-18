@@ -100,7 +100,7 @@ async fn init(user: Arc<Keypair>, example_program: &PROGRAM, program_data_addres
             selector: SELECTOR,
         })
         .payer(user.clone())
-        .signer(&user)
+        .signer(user)
         .send()
         .await
         .expect("Was unable to submit the initialization transaction");
@@ -206,7 +206,7 @@ async fn increment_nonce(
             journal_outputs: output,
             proof: proof,
         })
-        .signer(&user)
+        .signer(user)
         .send()
         .await
         .expect("Unable to send increment nonce transaction");
@@ -266,7 +266,7 @@ async fn main() {
 
     debug!("Account Program Data PDA Address is: {program_data_address}");
 
-    let rpc = example_program.async_rpc();
+    let rpc = example_program.rpc();
 
     let latest_blockhash = rpc
         .get_latest_blockhash()

@@ -31,16 +31,12 @@ pub use vk::{VerificationKey, VERIFICATION_KEY};
 
 declare_id!("THq1qFYQoh7zgcjXoMXduDBqiZRCPeg3PvvMbrVQUge");
 
+include!(concat!(env!("OUT_DIR"), "/control_ids.rs"));
+
 // Base field modulus 'q' for BN254
 // https://docs.rs/ark-bn254/latest/ark_bn254/
 pub const BASE_FIELD_MODULUS_Q: [u8; 32] =
     hex!("30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD47");
-// REF: https://github.com/risc0/risc0/blob/main/risc0/circuit/recursion/src/control_id.rs#L47
-pub const ALLOWED_CONTROL_ROOT: [u8; 32] =
-    hex!("8cdad9242664be3112aba377c5425a4df735eb1c6966472b561d2855932c0469");
-// REF: https://github.com/risc0/risc0/blob/main/risc0/circuit/recursion/src/control_id.rs#L51
-pub const BN254_IDENTITY_CONTROL_ID: [u8; 32] =
-    hex!("c07a65145c3cb48b6101962ea607a4dd93c753bb26975cb47feb00d3666e4404");
 // SHA256('risc0.Output')
 pub const OUTPUT_TAG: [u8; 32] =
     hex!("77eafeb366a78b47747de0d7bb176284085ff5564887009a5be63da32d3559d4");
