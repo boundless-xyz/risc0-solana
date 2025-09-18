@@ -268,7 +268,7 @@ fn subtract_be_bytes(a: &mut [u8; 32], b: &[u8; 32]) {
 }
 
 #[cfg(test)]
-mod v3_receipt;
+mod v3_test_receipt;
 
 #[cfg(test)]
 mod test_groth16_lib {
@@ -277,7 +277,7 @@ mod test_groth16_lib {
     use super::*;
     use risc0_zkvm::sha::Digestible;
     use risc0_zkvm::Receipt;
-    use v3_receipt::{FIB_ID as IMG_ID, FIB_RECEIPT as RECEIPT};
+    use v3_test_receipt::{FIB_ID as IMG_ID, FIB_RECEIPT as RECEIPT};
 
     // Reference base field modulus for BN254
     // https://docs.rs/ark-bn254/latest/ark_bn254/
@@ -359,9 +359,12 @@ mod test_groth16_lib {
 
     #[test]
     pub fn test_verify() {
-        let (_, proof, public_inputs) = load_receipt_and_extract_data();
+        let (receipt, proof, public_inputs) = load_receipt_and_extract_data();
+        receipt
+            .verify(IMG_ID)
+            .expect("sanity check verification of receipt failed");
         let res = verify_groth16(&proof, &public_inputs);
-        assert!(res.is_ok(), "Verification failed");
+        assert!(res.is_ok(), "Contract verification failed");
     }
 
     #[test]
