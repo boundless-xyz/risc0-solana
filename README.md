@@ -23,8 +23,8 @@ Our core verifier infrastructure allows secure on-chain verification of RISC Zer
 
 We provide several supporting libraries to help developers integrate with the verifier:
 
-- [Groth16 Verifier][solana-verifier]: Groth16 proof verification using Solana `alt-bn254` system calls
-- [Ownable Library][solana-ownable]: Secure two-step ownership transfer for Solana programs
+- [Groth16 Verifier][verifier]: Groth16 proof verification using Solana `alt-bn254` system calls
+- [Ownable Library][ownable]: Secure two-step ownership transfer for Solana programs
 - [Example Code][examples]: Integration code demonstrating verifier usage
 
 ## Getting Started
@@ -40,7 +40,7 @@ Full documentation for using RISC Zero, including guides for [writing zkVM progr
 
 [RISC Zero]: https://github.com/risc0/risc0
 [Solana]: https://solana.com
-[examples]: ./solana-examples
+[examples]: ./examples
 [router]: ./solana-verifier
 [ownable]: ./solana-ownable
 [verifier]: ./solana-verifier/programs/groth_16_verifier
