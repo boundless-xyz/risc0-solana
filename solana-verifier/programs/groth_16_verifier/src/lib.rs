@@ -268,11 +268,16 @@ fn subtract_be_bytes(a: &mut [u8; 32], b: &[u8; 32]) {
 }
 
 #[cfg(test)]
+mod v3_receipt;
+
+#[cfg(test)]
 mod test_groth16_lib {
+
     use super::client::*;
     use super::*;
     use risc0_zkvm::sha::Digestible;
     use risc0_zkvm::Receipt;
+    use v3_receipt::{FIB_ID as IMG_ID, FIB_RECEIPT as RECEIPT};
 
     // Reference base field modulus for BN254
     // https://docs.rs/ark-bn254/latest/ark_bn254/
@@ -280,8 +285,7 @@ mod test_groth16_lib {
         "21888242871839275222246405745257275088696311157297823662689037894645226208583";
 
     fn load_receipt_and_extract_data() -> (Receipt, Proof, PublicInputs<5>) {
-        let receipt_json_str = include_bytes!("../test/data/receipt.json");
-        let receipt: Receipt = serde_json::from_slice(receipt_json_str).unwrap();
+        let receipt: Receipt = bincode::deserialize(RECEIPT).unwrap();
 
         let claim_digest = receipt
             .inner
@@ -384,12 +388,6 @@ mod test_groth16_lib {
     fn test_claim_digest() {
         let (receipt, _, _) = load_receipt_and_extract_data();
         let actual_claim_digest = receipt.claim().unwrap().digest();
-
-        // image id of receipt.json
-        const IMG_ID: [u32; 8] = [
-            18688597, 1673543865, 1491143371, 721664238, 865920440, 525156886, 2498763974,
-            799689043,
-        ];
 
         let mut image_id = [0u8; 32];
         for (i, &val) in IMG_ID.iter().enumerate() {

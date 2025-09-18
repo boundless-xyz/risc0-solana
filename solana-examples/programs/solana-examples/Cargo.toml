@@ -19,5 +19,4 @@ idl-build = ["anchor-lang/idl-build"]
 [dependencies]
 anchor-lang = "0.31.1"
 verifier_router = { path = "../../../solana-verifier/programs/verifier_router", features = ["cpi"] }
-methods = { path = "../../hello-world/methods"}
 shared = { path = "../../shared" }
