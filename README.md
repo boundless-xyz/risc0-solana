@@ -3,9 +3,6 @@
 
 # RISC Zero Solana
 
-> [!WARNING]
-> This is unaudited and not yet recommended for production use. 
-
 [RISC Zero] is a zero-knowledge verifiable general computing platform, with [Solana] integration.
 This repository contains our Solana verifier infrastructure and supporting code.
 
@@ -37,6 +34,12 @@ Full documentation for using RISC Zero, including guides for [writing zkVM progr
 - [Verifier Router][router]
 - [Ownable Library][ownable]
 - [Example Code][examples]
+
+## Audits
+
+An audit was completed by Veridise as of commit [84a1929](https://github.com/boundless-xyz/risc0-solana/tree/84a1929bec853cd90848d2fd0b0eda001fee522d) with suggested fixes applied in [5d7f7f9](https://github.com/boundless-xyz/risc0-solana/tree/5d7f7f9cab12cbcf21d84fffc15c1bd1c89df3de).
+
+See the [full audit report](https://github.com/risc0/rz-security/blob/main/audits/contracts/veridise_solanaverifier_20240904.pdf)
 
 [RISC Zero]: https://github.com/risc0/risc0
 [Solana]: https://solana.com
