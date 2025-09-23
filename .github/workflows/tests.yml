@@ -17,7 +17,7 @@ env:
   RUST_BACKTRACE: "1"
 
 jobs:
-  test:
+  rust-tests:
     runs-on: [ self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}" ]
     strategy:
       matrix:
@@ -38,3 +38,51 @@ jobs:
       - name: solana-verifier Cargo tests
         working-directory: ./solana-verifier
         run: cargo test --locked
+
+  anchor-tests:
+    runs-on: [ self-hosted, prod, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}" ]
+    strategy:
+      matrix:
+        include:
+          - os: Linux
+            arch: X64
+            feature: default
+            device: cpu
+    steps:
+      - name: clone repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev pkg-config
+
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install node_modules
+        working-directory: ./solana-verifier
+        run: yarn install --frozen-lockfile
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v2.3.9/install)"
+          echo "/home/ubuntu/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Create keypair for testing
+        run: solana-keygen new --no-bip39-passphrase
+
+      - name: Install Anchor CLI
+        run: cargo install --git https://github.com/coral-xyz/anchor anchor-cli --tag v0.31.1
+
+      - name: Build and Test
+        working-directory: ./solana-verifier
+        run: anchor test
