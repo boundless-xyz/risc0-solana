@@ -21,8 +21,6 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type Account,
   type Address,
@@ -49,17 +47,20 @@ export function getVerifierEntryDiscriminatorBytes() {
 
 export type VerifierEntry = {
   discriminator: ReadonlyUint8Array;
-  selector: number;
+  selector: ReadonlyUint8Array;
   verifier: Address;
 };
 
-export type VerifierEntryArgs = { selector: number; verifier: Address };
+export type VerifierEntryArgs = {
+  selector: ReadonlyUint8Array;
+  verifier: Address;
+};
 
 export function getVerifierEntryEncoder(): FixedSizeEncoder<VerifierEntryArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['selector', getU32Encoder()],
+      ['selector', fixEncoderSize(getBytesEncoder(), 4)],
       ['verifier', getAddressEncoder()],
     ]),
     (value) => ({ ...value, discriminator: VERIFIER_ENTRY_DISCRIMINATOR })
@@ -69,7 +70,7 @@ export function getVerifierEntryEncoder(): FixedSizeEncoder<VerifierEntryArgs> {
 export function getVerifierEntryDecoder(): FixedSizeDecoder<VerifierEntry> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
     ['verifier', getAddressDecoder()],
   ]);
 }

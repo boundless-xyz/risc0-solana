@@ -16,8 +16,6 @@ import {
   getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -98,16 +96,16 @@ export type EmergencyStopInstruction<
 
 export type EmergencyStopInstructionData = {
   discriminator: ReadonlyUint8Array;
-  selector: number;
+  selector: ReadonlyUint8Array;
 };
 
-export type EmergencyStopInstructionDataArgs = { selector: number };
+export type EmergencyStopInstructionDataArgs = { selector: ReadonlyUint8Array };
 
 export function getEmergencyStopInstructionDataEncoder(): FixedSizeEncoder<EmergencyStopInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['selector', getU32Encoder()],
+      ['selector', fixEncoderSize(getBytesEncoder(), 4)],
     ]),
     (value) => ({ ...value, discriminator: EMERGENCY_STOP_DISCRIMINATOR })
   );
@@ -116,7 +114,7 @@ export function getEmergencyStopInstructionDataEncoder(): FixedSizeEncoder<Emerg
 export function getEmergencyStopInstructionDataDecoder(): FixedSizeDecoder<EmergencyStopInstructionData> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
   ]);
 }
 
@@ -247,7 +245,7 @@ export async function getEmergencyStopInstructionAsync<
         getBytesEncoder().encode(
           new Uint8Array([118, 101, 114, 105, 102, 105, 101, 114])
         ),
-        getU32Encoder().encode(expectSome(args.selector)),
+        fixEncoderSize(getBytesEncoder(), 4).encode(expectSome(args.selector)),
       ],
     });
   }

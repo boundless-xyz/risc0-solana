@@ -19,8 +19,6 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type Account,
   type Address,
@@ -54,20 +52,15 @@ export function getVerifierRouterDiscriminatorBytes() {
 export type VerifierRouter = {
   discriminator: ReadonlyUint8Array;
   ownership: Ownership;
-  verifierCount: number;
 };
 
-export type VerifierRouterArgs = {
-  ownership: OwnershipArgs;
-  verifierCount: number;
-};
+export type VerifierRouterArgs = { ownership: OwnershipArgs };
 
 export function getVerifierRouterEncoder(): Encoder<VerifierRouterArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
       ['ownership', getOwnershipEncoder()],
-      ['verifierCount', getU32Encoder()],
     ]),
     (value) => ({ ...value, discriminator: VERIFIER_ROUTER_DISCRIMINATOR })
   );
@@ -77,7 +70,6 @@ export function getVerifierRouterDecoder(): Decoder<VerifierRouter> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
     ['ownership', getOwnershipDecoder()],
-    ['verifierCount', getU32Decoder()],
   ]);
 }
 

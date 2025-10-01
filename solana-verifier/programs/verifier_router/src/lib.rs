@@ -28,6 +28,8 @@ use state::*;
 
 declare_id!("6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7");
 
+pub type Selector = [u8; 4];
+
 /// Verifier Router Program for Anchor
 ///
 /// This program provides a routing and management system for zero-knowledge proof verifiers
@@ -49,29 +51,29 @@ pub mod verifier_router {
         router::initialize(ctx)
     }
 
-    pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
+    pub fn add_verifier(ctx: Context<AddVerifier>, selector: Selector) -> Result<()> {
         // This function checks ownership and can only be called by the owner
         router::add_verifier(ctx, selector)
     }
 
     pub fn verify(
         ctx: Context<Verify>,
-        _selector: u32,
+        selector: Selector,
         proof: Proof,
         image_id: [u8; 32],
         journal_digest: [u8; 32],
     ) -> Result<()> {
-        router::verify(ctx, proof, image_id, journal_digest)
+        router::verify(ctx, selector, proof, image_id, journal_digest)
     }
 
-    pub fn emergency_stop(ctx: Context<EmergencyStop>, selector: u32) -> Result<()> {
+    pub fn emergency_stop(ctx: Context<EmergencyStop>, selector: Selector) -> Result<()> {
         // This function checks ownership and can only be called by the owner
         estop::emergency_stop_by_owner(ctx, selector)
     }
 
     pub fn emergency_stop_with_proof(
         ctx: Context<EmergencyStop>,
-        selector: u32,
+        selector: Selector,
         proof: Proof,
     ) -> Result<()> {
         estop::emergency_stop_with_proof(ctx, selector, proof)

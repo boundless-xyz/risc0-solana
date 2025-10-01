@@ -17,6 +17,8 @@
 use anchor_lang::prelude::*;
 use ownable::{Ownable, Ownership};
 
+use crate::Selector;
+
 /// Main router account storing ownership and verifier count
 ///
 /// This account maintains the registry of verifiers and implements ownership controls
@@ -31,7 +33,6 @@ use ownable::{Ownable, Ownership};
 #[derive(Ownable)]
 pub struct VerifierRouter {
     pub ownership: Ownership,
-    pub verifier_count: u32,
 }
 
 /// Account storing information about a registered verifier
@@ -44,6 +45,6 @@ pub struct VerifierRouter {
 /// * `verifier` - Public key of the verifier program
 #[account]
 pub struct VerifierEntry {
-    pub selector: u32,
+    pub selector: Selector,
     pub verifier: Pubkey,
 }

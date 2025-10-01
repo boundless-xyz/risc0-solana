@@ -16,8 +16,6 @@ import {
   getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -92,16 +90,16 @@ export type AddVerifierInstruction<
 
 export type AddVerifierInstructionData = {
   discriminator: ReadonlyUint8Array;
-  selector: number;
+  selector: ReadonlyUint8Array;
 };
 
-export type AddVerifierInstructionDataArgs = { selector: number };
+export type AddVerifierInstructionDataArgs = { selector: ReadonlyUint8Array };
 
 export function getAddVerifierInstructionDataEncoder(): FixedSizeEncoder<AddVerifierInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['selector', getU32Encoder()],
+      ['selector', fixEncoderSize(getBytesEncoder(), 4)],
     ]),
     (value) => ({ ...value, discriminator: ADD_VERIFIER_DISCRIMINATOR })
   );
@@ -110,7 +108,7 @@ export function getAddVerifierInstructionDataEncoder(): FixedSizeEncoder<AddVeri
 export function getAddVerifierInstructionDataDecoder(): FixedSizeDecoder<AddVerifierInstructionData> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
   ]);
 }
 
@@ -134,7 +132,7 @@ export type AddVerifierAsyncInput<
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
   router?: Address<TAccountRouter>;
-  /** The new verifier entry to be created which must have a selector in sequential order */
+  /** The new verifier entry to be created */
   verifierEntry?: Address<TAccountVerifierEntry>;
   /** Program data account (Data of account authority from LoaderV3) of the verifier being added */
   verifierProgramData?: Address<TAccountVerifierProgramData>;
@@ -224,7 +222,7 @@ export async function getAddVerifierInstructionAsync<
         getBytesEncoder().encode(
           new Uint8Array([118, 101, 114, 105, 102, 105, 101, 114])
         ),
-        getU32Encoder().encode(expectSome(args.selector)),
+        fixEncoderSize(getBytesEncoder(), 4).encode(expectSome(args.selector)),
       ],
     });
   }
@@ -279,7 +277,7 @@ export type AddVerifierInput<
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
   router: Address<TAccountRouter>;
-  /** The new verifier entry to be created which must have a selector in sequential order */
+  /** The new verifier entry to be created */
   verifierEntry: Address<TAccountVerifierEntry>;
   /** Program data account (Data of account authority from LoaderV3) of the verifier being added */
   verifierProgramData: Address<TAccountVerifierProgramData>;
@@ -388,7 +386,7 @@ export type ParsedAddVerifierInstruction<
   accounts: {
     /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
     router: TAccountMetas[0];
-    /** The new verifier entry to be created which must have a selector in sequential order */
+    /** The new verifier entry to be created */
     verifierEntry: TAccountMetas[1];
     /** Program data account (Data of account authority from LoaderV3) of the verifier being added */
     verifierProgramData: TAccountMetas[2];

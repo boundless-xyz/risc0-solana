@@ -109,8 +109,8 @@ describe("verifier-router", () => {
   const badImageId = new Uint8Array(32).fill(1); // Non-empty Image ID
 
   // Test selectors
-  const GROTH16_SELECTOR = 1;
-  const TEST_BAD_SELECTOR = 2;
+  const GROTH16_SELECTOR = new Uint8Array([1, 1, 1, 1]);
+  const TEST_BAD_SELECTOR = new Uint8Array([2, 2, 2, 2]);
 
   before(async () => {
     rpc = createSolanaRpc("http://localhost:8899");
@@ -209,7 +209,6 @@ describe("verifier-router", () => {
     const account = await fetchVerifierRouter(rpc, routerAddress);
     expect(account.data.ownership.owner).to.deep.equal(some(owner.address));
     expect(account.data.ownership.pendingOwner).to.deep.equal(none());
-    expect(account.data.verifierCount).to.equal(0);
   });
 
   it("Should not allow a verifier to be added to the router, that the router does not have upgrade authority over", async () => {
@@ -282,23 +281,6 @@ describe("verifier-router", () => {
     );
   });
 
-  it("Should not allow a verifier to be added with an out of order selector", async () => {
-    const addBadVerifierInstruction = getAddVerifierInstruction({
-      authority: owner,
-      router: routerAddress,
-      selector: TEST_BAD_SELECTOR,
-      verifierEntry: badVerifierPDAAddress,
-      verifierProgram: TEST_BAD_VERIFIER_PROGRAM_ADDRESS,
-      verifierProgramData: badVerifierProgramDataAddress,
-    });
-
-    await expectError(
-      sendTx(addBadVerifierInstruction),
-      "SelectorInvalid",
-      "Was expecting an Invalid Selector Error"
-    );
-  });
-
   it("Should allow a verifier to be added to the router after the upgrade authority is correctly set", async () => {
     const addGrothInstruction = getAddVerifierInstruction({
       authority: owner,
@@ -319,16 +301,14 @@ describe("verifier-router", () => {
     });
 
     let routerAccount = await fetchVerifierRouter(rpc, routerAddress);
-    expect(routerAccount.data.verifierCount).to.equal(0);
 
     // We must do these sequentially so that we don't hit a race condition on selector numbers
     await sendTx(addGrothInstruction);
 
     routerAccount = await fetchVerifierRouter(rpc, routerAddress);
-    expect(routerAccount.data.verifierCount).to.equal(1);
 
     const grothAccount = await fetchVerifierEntry(rpc, grothPDAAddress);
-    expect(grothAccount.data.selector).to.equal(GROTH16_SELECTOR);
+    expect(grothAccount.data.selector).to.deep.equal(GROTH16_SELECTOR);
     expect(grothAccount.data.verifier).to.equal(
       GROTH16_VERIFIER_PROGRAM_ADDRESS
     );
@@ -336,13 +316,12 @@ describe("verifier-router", () => {
     await sendTx(addBadVerifierInstruction);
 
     const badAccount = await fetchVerifierEntry(rpc, badVerifierPDAAddress);
-    expect(badAccount.data.selector).to.equal(TEST_BAD_SELECTOR);
+    expect(badAccount.data.selector).to.deep.equal(TEST_BAD_SELECTOR);
     expect(badAccount.data.verifier).to.equal(
       TEST_BAD_VERIFIER_PROGRAM_ADDRESS
     );
 
     routerAccount = await fetchVerifierRouter(rpc, routerAddress);
-    expect(routerAccount.data.verifierCount).to.equal(2);
   });
 
   it("should allow a user to submit a valid proof to the verifier", async () => {
@@ -445,7 +424,6 @@ describe("verifier-router", () => {
     expect(verifierEntry.exists).to.equal(false);
 
     const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
-    expect(routerAccount.data.verifierCount).to.equal(2);
   });
 
   it("Should allow an owner to call estop", async () => {
@@ -465,7 +443,6 @@ describe("verifier-router", () => {
     expect(verifierEntry.exists).to.equal(false);
 
     const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
-    expect(routerAccount.data.verifierCount).to.equal(2);
   });
 
   it("should not allow a user to submit a valid proof to the verifier after e-stop was called on it", async () => {

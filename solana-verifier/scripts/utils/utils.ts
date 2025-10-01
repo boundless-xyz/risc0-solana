@@ -331,10 +331,10 @@ export async function getRouterPda(
  */
 export async function getVerifierEntryPda(
   routerAddress: Address<string>,
-  selector: number
+  selector: Uint8Array
 ): Promise<PDA> {
   const routerPda = await getRouterPda(routerAddress);
-  const selectorSeed = getU32Codec().encode(selector);
+  const selectorSeed = selector;
   const pda = await getProgramDerivedAddress({
     programAddress: routerAddress,
     seeds: ["verifier", selectorSeed],
