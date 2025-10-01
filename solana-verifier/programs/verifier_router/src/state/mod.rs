@@ -44,6 +44,6 @@ pub struct VerifierRouter {
 /// * `verifier` - Public key of the verifier program
 #[account]
 pub struct VerifierEntry {
-    pub selector: u32,
+    pub selector: [u8; 4],
     pub verifier: Pubkey,
 }

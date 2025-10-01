@@ -33,7 +33,7 @@ use anchor_lang::solana_program::bpf_loader_upgradeable;
 /// # Arguments
 /// * `selector` - A u32 that uniquely identifies the verifier to stop
 #[derive(Accounts)]
-#[instruction(selector: u32)]
+#[instruction(selector: [u8; 4])]
 pub struct EmergencyStop<'info> {
     /// The router account PDA managing verifiers and required Upgrade Authority address of verifier
     #[account(
@@ -49,7 +49,7 @@ pub struct EmergencyStop<'info> {
         mut,
         seeds = [
             b"verifier",
-            &selector.to_le_bytes()
+            &selector
         ],
         bump,
         constraint = verifier_entry.selector == selector,

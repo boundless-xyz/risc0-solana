@@ -118,7 +118,7 @@ pub struct AddVerifier<'info> {
 /// # Arguments
 /// * `selector` - A u32 that uniquely identifies the verifier entry
 #[derive(Accounts)]
-#[instruction(selector: u32)]
+#[instruction(selector: [u8; 4])]
 pub struct Verify<'info> {
     /// The router account PDA managing verifiers
     #[account(
@@ -131,7 +131,7 @@ pub struct Verify<'info> {
     #[account(
        seeds = [
             b"verifier",
-            selector.to_le_bytes().as_ref()
+            &selector
        ],
        bump,
        constraint = verifier_entry.selector == selector,
@@ -187,7 +187,7 @@ pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
 ///                                       then current verifier count)
 /// * `Err(RouterError::VerifierInvalidAuthority)` if the router PDA is not the upgrade authority
 /// * `Err(RouterError::Overflow)` if adding the verifier would overflow the counter (highly unlikely)
-pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
+pub fn add_verifier(ctx: Context<AddVerifier>, selector: [u8; 4]) -> Result<()> {
     // Verify the caller is the owner of the contract
     ctx.accounts
         .router

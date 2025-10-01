@@ -49,7 +49,7 @@ pub mod verifier_router {
         router::initialize(ctx)
     }
 
-    pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
+    pub fn add_verifier(ctx: Context<AddVerifier>, selector: [u8; 4]) -> Result<()> {
         // This function checks ownership and can only be called by the owner
         router::add_verifier(ctx, selector)
     }

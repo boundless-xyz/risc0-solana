@@ -16,8 +16,6 @@ import {
   getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -92,16 +90,16 @@ export type AddVerifierInstruction<
 
 export type AddVerifierInstructionData = {
   discriminator: ReadonlyUint8Array;
-  selector: number;
+  selector: ReadonlyUint8Array;
 };
 
-export type AddVerifierInstructionDataArgs = { selector: number };
+export type AddVerifierInstructionDataArgs = { selector: ReadonlyUint8Array };
 
 export function getAddVerifierInstructionDataEncoder(): FixedSizeEncoder<AddVerifierInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['selector', getU32Encoder()],
+      ['selector', fixEncoderSize(getBytesEncoder(), 4)],
     ]),
     (value) => ({ ...value, discriminator: ADD_VERIFIER_DISCRIMINATOR })
   );
@@ -110,7 +108,7 @@ export function getAddVerifierInstructionDataEncoder(): FixedSizeEncoder<AddVeri
 export function getAddVerifierInstructionDataDecoder(): FixedSizeDecoder<AddVerifierInstructionData> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
   ]);
 }
 
@@ -224,7 +222,7 @@ export async function getAddVerifierInstructionAsync<
         getBytesEncoder().encode(
           new Uint8Array([118, 101, 114, 105, 102, 105, 101, 114])
         ),
-        getU32Encoder().encode(expectSome(args.selector)),
+        fixEncoderSize(getBytesEncoder(), 4).encode(expectSome(args.selector)),
       ],
     });
   }
