@@ -28,11 +28,7 @@ import {
   type ReadonlyUint8Array,
 } from '@solana/kit';
 import { VERIFIER_ROUTER_PROGRAM_ADDRESS } from '../programs';
-import {
-  expectSome,
-  getAccountMetaFactory,
-  type ResolvedAccount,
-} from '../shared';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 import {
   getProofDecoder,
   getProofEncoder,
@@ -134,7 +130,7 @@ export type VerifyAsyncInput<
   /** The router account PDA managing verifiers */
   router?: Address<TAccountRouter>;
   /** The verifier entry to use, validated using PDA derivation */
-  verifierEntry?: Address<TAccountVerifierEntry>;
+  verifierEntry: Address<TAccountVerifierEntry>;
   /**
    * The verifier program to be invoked
    * Must match the address of the program listed in the verifier entry of the specific selector
@@ -201,17 +197,6 @@ export async function getVerifyInstructionAsync<
         getBytesEncoder().encode(
           new Uint8Array([114, 111, 117, 116, 101, 114])
         ),
-      ],
-    });
-  }
-  if (!accounts.verifierEntry.value) {
-    accounts.verifierEntry.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([118, 101, 114, 105, 102, 105, 101, 114])
-        ),
-        fixEncoderSize(getBytesEncoder(), 4).encode(expectSome(args.selector)),
       ],
     });
   }

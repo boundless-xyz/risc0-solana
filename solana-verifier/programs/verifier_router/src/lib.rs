@@ -30,6 +30,14 @@ declare_id!("6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7");
 
 pub type Selector = [u8; 4];
 
+/// An encoded RISC Zero proof along with a selector
+/// which encodes the required verifier version
+#[derive(Clone, PartialEq, Eq, AnchorDeserialize, AnchorSerialize)]
+pub struct Seal {
+    pub selector: Selector,
+    pub proof: Proof,
+}
+
 /// Verifier Router Program for Anchor
 ///
 /// This program provides a routing and management system for zero-knowledge proof verifiers
@@ -58,12 +66,11 @@ pub mod verifier_router {
 
     pub fn verify(
         ctx: Context<Verify>,
-        selector: Selector,
-        proof: Proof,
+        seal: Seal,
         image_id: [u8; 32],
         journal_digest: [u8; 32],
     ) -> Result<()> {
-        router::verify(ctx, selector, proof, image_id, journal_digest)
+        router::verify(ctx, seal, image_id, journal_digest)
     }
 
     pub fn emergency_stop(ctx: Context<EmergencyStop>, selector: Selector) -> Result<()> {
