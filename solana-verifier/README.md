@@ -80,7 +80,7 @@ yarn run accept  # Run on new owner's machine
 
 2. Add Verifier:
 ```bash
-VERIFIER_ADDRESS=<address> yarn run add
+VERIFIER_ADDRESS=<address> SELECTOR=<selector-hex> yarn run add
 ```
 
 3. Emergency Stop:

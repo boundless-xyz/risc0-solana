@@ -673,7 +673,7 @@ function parseBoolean(value: string): boolean {
  * @param value - String to parse
  * @returns Parsed value
  */
-function parseHex(value: string, length: number): Uint8Array {
+export function parseHex(value: string, length: number): Uint8Array {
   // Normalize: remove optional "0x" prefix
   if (value.startsWith("0x") || value.startsWith("0X")) {
     value = value.slice(2);
