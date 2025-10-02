@@ -48,6 +48,7 @@ import {
   createRpc,
   getRouterAddress,
   getTransactionSigner,
+  parseHex,
 } from "./utils/utils";
 import * as readline from "readline/promises";
 const rl = readline.createInterface({
@@ -58,15 +59,18 @@ import { estopByOwner } from "./utils/estop";
 
 const logger = createLogger();
 
-async function collectUserInput(): Promise<number> {
+async function collectUserInput(): Promise<Uint8Array> {
   console.log(
     "Script to call Estop initiated, answer the following questions to continue:"
   );
-  const input = Number(await rl.question("Enter Verifier selector (u32): "));
-  const verify = Number(
-    await rl.question(`Reenter verifier selector to confirm: `)
+  const selector = parseHex(await rl.question("Enter Verifier selector as hex string: "), 4);
+  const verify = parseHex(
+    await rl.question(`Reenter verifier selector to confirm: `), 4
   );
-  if (input !== verify) {
+  if (
+    selector.length !== verify.length ||
+    !selector.every((value, index) => value === verify[index])
+  ) {
     logger.error("Inputs did not match, Exiting.");
     process.exit(1);
   }
@@ -78,7 +82,7 @@ async function collectUserInput(): Promise<number> {
     process.exit(1);
   }
   rl.close();
-  return input;
+  return selector;
 }
 
 async function run_estop() {

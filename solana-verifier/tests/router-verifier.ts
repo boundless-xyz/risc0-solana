@@ -17,7 +17,6 @@ import {
   getEmergencyStopInstruction,
   fetchVerifierEntry,
   getVerifyInstruction,
-  fetchMaybeVerifierEntry,
 } from "../scripts/verify-router";
 import {
   sendTransaction,
@@ -300,12 +299,9 @@ describe("verifier-router", () => {
       verifierProgramData: badVerifierProgramDataAddress,
     });
 
-    let routerAccount = await fetchVerifierRouter(rpc, routerAddress);
 
     // We must do these sequentially so that we don't hit a race condition on selector numbers
     await sendTx(addGrothInstruction);
-
-    routerAccount = await fetchVerifierRouter(rpc, routerAddress);
 
     const grothAccount = await fetchVerifierEntry(rpc, grothPDAAddress);
     expect(grothAccount.data.selector).to.deep.equal(GROTH16_SELECTOR);
@@ -320,8 +316,6 @@ describe("verifier-router", () => {
     expect(badAccount.data.verifier).to.equal(
       TEST_BAD_VERIFIER_PROGRAM_ADDRESS
     );
-
-    routerAccount = await fetchVerifierRouter(rpc, routerAddress);
   });
 
   it("should allow a user to submit a valid proof to the verifier", async () => {
@@ -365,7 +359,7 @@ describe("verifier-router", () => {
     piA[0] = 42;
 
     // Test Proof for the Test Bad Verifier
-    let badProof: Proof = {
+    const badProof: Proof = {
       piA, // Non-Empty 64 Byte array
       piB: new Array(128), // Empty 128 byte array
       piC: new Uint8Array(64), // Empty 64 byte array
@@ -373,12 +367,10 @@ describe("verifier-router", () => {
 
     const estopProofInstruction = getEmergencyStopWithProofInstruction({
       authority: notOwner,
-      bpfLoaderUpgradableProgram: SOLANA_LOADER_V3_PROGRAM_PROGRAM_ADDRESS,
       proof: badProof,
       router: routerAddress,
       selector: TEST_BAD_SELECTOR,
       verifierEntry: badVerifierPDAAddress,
-      verifierProgramData: badVerifierProgramDataAddress,
       verifierProgram: TEST_BAD_VERIFIER_PROGRAM_ADDRESS,
     });
 
@@ -392,11 +384,9 @@ describe("verifier-router", () => {
   it("should not allow someone other then owner to call estop by owner", async () => {
     const estopProofInstruction = getEmergencyStopInstruction({
       authority: notOwner,
-      bpfLoaderUpgradableProgram: SOLANA_LOADER_V3_PROGRAM_PROGRAM_ADDRESS,
       router: routerAddress,
       selector: TEST_BAD_SELECTOR,
       verifierEntry: badVerifierPDAAddress,
-      verifierProgramData: badVerifierProgramDataAddress,
       verifierProgram: TEST_BAD_VERIFIER_PROGRAM_ADDRESS,
     });
 
@@ -406,43 +396,35 @@ describe("verifier-router", () => {
   it("should allow any user to call e-stop if they have proof the verifier is broken", async () => {
     const estopProofInstruction = getEmergencyStopWithProofInstruction({
       authority: notOwner,
-      bpfLoaderUpgradableProgram: SOLANA_LOADER_V3_PROGRAM_PROGRAM_ADDRESS,
       proof: emptyProof,
       router: routerAddress,
       selector: TEST_BAD_SELECTOR,
       verifierEntry: badVerifierPDAAddress,
-      verifierProgramData: badVerifierProgramDataAddress,
       verifierProgram: TEST_BAD_VERIFIER_PROGRAM_ADDRESS,
     });
 
     await sendTx(estopProofInstruction);
 
-    const verifierEntry = await fetchMaybeVerifierEntry(
+    const verifierEntry = await fetchVerifierEntry(
       rpc,
       badVerifierPDAAddress
     );
-    expect(verifierEntry.exists).to.equal(false);
-
-    const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
+    expect(verifierEntry.data.estopped).to.equal(true);
   });
 
   it("Should allow an owner to call estop", async () => {
     const estopProofInstruction = getEmergencyStopInstruction({
       authority: owner,
-      bpfLoaderUpgradableProgram: SOLANA_LOADER_V3_PROGRAM_PROGRAM_ADDRESS,
       router: routerAddress,
       selector: GROTH16_SELECTOR,
       verifierEntry: grothPDAAddress,
-      verifierProgramData: grothProgramDataAddress,
       verifierProgram: GROTH16_VERIFIER_PROGRAM_ADDRESS,
     });
 
     await sendTx(estopProofInstruction);
 
-    const verifierEntry = await fetchMaybeVerifierEntry(rpc, grothPDAAddress);
-    expect(verifierEntry.exists).to.equal(false);
-
-    const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
+    const verifierEntry = await fetchVerifierEntry(rpc, grothPDAAddress);
+    expect(verifierEntry.data.estopped).to.equal(true);
   });
 
   it("should not allow a user to submit a valid proof to the verifier after e-stop was called on it", async () => {
@@ -458,6 +440,6 @@ describe("verifier-router", () => {
       journalDigest: emptyJournalDigest,
     });
 
-    await expectError(sendTx(verifyInstruction), "AccountNotInitialized");
+    await expectError(sendTx(verifyInstruction), "SelectorDeactivated");
   });
 });

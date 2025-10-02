@@ -52,13 +52,13 @@ export async function estopByOwner(
   rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>,
   routerAddress: Address<string>,
   owner: TransactionSigner,
-  selector: number
+  selector: Uint8Array,
 ): Promise<void> {
   logger.warn(
     "EMERGENCY STOP HAS BEEN STARTED, THIS IS IRREVERSABLE...Program Will sleep for 5 seconds Kill program immediatly if not intentional, attempting to terminate a verifier!"
   );
   logger.info(
-    `Emeregency Stop attempting to stop verifier with Selector: ${selector} on router ${routerAddress}`
+    `Emeregency Stop attempting to stop verifier with Selector: 0x${Buffer.from(selector).toString("hex")} on router ${routerAddress}`
   );
 
   await sleep(5000); // Sleep for 5 seconds in case this was an accident

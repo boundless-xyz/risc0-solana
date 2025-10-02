@@ -47,6 +47,7 @@ import {
   getVerifierAddress,
   getRouterPda,
   createLogger,
+  getSelector,
 } from "./utils/utils";
 import { addVerifier } from "./utils/addVerifier";
 
@@ -57,6 +58,7 @@ async function runAddVerifier() {
   const routerAddress = getRouterAddress();
   const deployer = await getLocalKeypair();
   const owner = await getTransactionSigner();
+  const selector = getSelector();
 
   logger.info(
     `Using Router: ${routerAddress}, adding verifier ${verifierAddress}`
@@ -82,7 +84,8 @@ async function runAddVerifier() {
     rpc.rpc_subscription,
     verifierAddress,
     routerAddress,
-    owner
+    owner,
+    selector
   );
 
   logger.info("Verifier was successfully added to the router");
