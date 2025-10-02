@@ -175,6 +175,8 @@ async fn increment_nonce(
     let seal =
         encode_seal(&groth16_receipt.seal).expect("Unable to generate proof from Groth Receipt");
 
+    info!("Encoded with selector: {:?}", seal.selector);
+
     let (router_pda_address, _) = Pubkey::find_program_address(&[b"router"], &verifier_router::ID);
     debug!("Using the address: {router_pda_address} as the Router Account");
 

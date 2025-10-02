@@ -70,6 +70,7 @@ async function run_deployment(): Promise<void> {
   const deployer = await getLocalKeypair();
   const verify = verifiable();
   const rpc = createRpc();
+  const selector = new Uint8Array([115, 196, 87, 186]);
 
   logger.info("Checking account balances before starting deploy.");
 
@@ -164,7 +165,8 @@ async function run_deployment(): Promise<void> {
     rpc.rpc_subscription,
     verifier_address,
     routerAddress,
-    owner
+    owner,
+    selector,
   );
 
   logger.info("Programs deployed and initialized");
