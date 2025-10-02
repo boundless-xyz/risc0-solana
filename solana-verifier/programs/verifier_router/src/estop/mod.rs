@@ -15,7 +15,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::program::invoke_signed;
 use groth_16_verifier::cpi::accounts::VerifyProof;
 use groth_16_verifier::Proof;
 pub mod events;
@@ -23,15 +22,13 @@ use crate::state::{VerifierEntry, VerifierRouter};
 use crate::{RouterError, Selector};
 use events::EmergencyStopEvent;
 
-use anchor_lang::solana_program::bpf_loader_upgradeable;
-
 /// Account validation for emergency stop operations
 ///
 /// Validates accounts needed for stopping a verifier and closing its accounts.
 /// Can be triggered by owner or with a valid proof of exploit.
 ///
 /// # Arguments
-/// * `selector` - A u32 that uniquely identifies the verifier to stop
+/// * `selector` - A 4-byte value that uniquely identifies the verifier to stop
 #[derive(Accounts)]
 #[instruction(selector: Selector)]
 pub struct EmergencyStop<'info> {
@@ -70,38 +67,14 @@ pub struct EmergencyStop<'info> {
         ]
     pub verifier_program: UncheckedAccount<'info>,
 
-    /// The Program Data account of the verifier to be closed
-    #[account(
-        seeds = [
-            verifier_program.key().as_ref()
-        ],
-        bump,
-        seeds::program = bpf_loader_upgradeable::ID,
-    )]
-    pub verifier_program_data: Account<'info, ProgramData>,
-
-    /// This is the Loader V3 BPF Upgrade program, Not written in Anchor so we cannot use the
-    /// CPI extensions to automatically generate a secure CPI call and must do so manually
-    /// CHECK: Verify the program address matches the known Loader V3 Program Address
-    #[account(constraint = bpf_loader_upgradable_program.key() == bpf_loader_upgradeable::ID)]
-    pub bpf_loader_upgradable_program: UncheckedAccount<'info>,
-
     /// Required because we are closing accounts
     pub system_program: Program<'info, System>,
 }
 
 /// # WARNING: IRREVERSIBLE ACTION
-/// Calling E-Stop on a Verifier will close the program account,
-/// close the VerifierEntry Account and permanently disable the
-/// verifier selector associated with the E-Stop'd Program. If successfully
-/// called there is no way to re-enable a stopped selector, make sure you really
-/// want to do this.
+/// Calling E-Stop on a Verifier marks it as being compromised and it can never be re-enabled.
 ///
 /// Executes an emergency stop of a verifier by the owner
-///
-/// Closes the verifier entry and program accounts, preventing further use.
-/// Can only be called by the router's owner. The caller of this function gets
-/// the rent refund.
 ///
 /// # Arguments
 /// * `ctx` - The EmergencyStop context containing validated accounts
@@ -133,7 +106,6 @@ pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: Selector) 
 /// Executes an emergency stop of a verifier using a proof of exploit
 ///
 /// Allows anyone to stop a verifier by providing a valid proof of exploitation.
-/// The caller of this function gets the rent refund.
 ///
 /// # Notice:
 ///

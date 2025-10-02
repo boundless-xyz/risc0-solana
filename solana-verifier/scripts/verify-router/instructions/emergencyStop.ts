@@ -10,7 +10,6 @@ import {
   combineCodec,
   fixDecoderSize,
   fixEncoderSize,
-  getAddressEncoder,
   getBytesDecoder,
   getBytesEncoder,
   getProgramDerivedAddress,
@@ -27,14 +26,13 @@ import {
   type InstructionWithAccounts,
   type InstructionWithData,
   type ReadonlyAccount,
+  type ReadonlySignerAccount,
   type ReadonlyUint8Array,
   type TransactionSigner,
   type WritableAccount,
-  type WritableSignerAccount,
 } from '@solana/kit';
 import { VERIFIER_ROUTER_PROGRAM_ADDRESS } from '../programs';
 import {
-  expectAddress,
   expectSome,
   getAccountMetaFactory,
   type ResolvedAccount,
@@ -56,10 +54,6 @@ export type EmergencyStopInstruction<
   TAccountVerifierEntry extends string | AccountMeta<string> = string,
   TAccountAuthority extends string | AccountMeta<string> = string,
   TAccountVerifierProgram extends string | AccountMeta<string> = string,
-  TAccountVerifierProgramData extends string | AccountMeta<string> = string,
-  TAccountBpfLoaderUpgradableProgram extends
-    | string
-    | AccountMeta<string> = string,
   TAccountSystemProgram extends
     | string
     | AccountMeta<string> = '11111111111111111111111111111111',
@@ -69,24 +63,18 @@ export type EmergencyStopInstruction<
   InstructionWithAccounts<
     [
       TAccountRouter extends string
-        ? WritableAccount<TAccountRouter>
+        ? ReadonlyAccount<TAccountRouter>
         : TAccountRouter,
       TAccountVerifierEntry extends string
         ? WritableAccount<TAccountVerifierEntry>
         : TAccountVerifierEntry,
       TAccountAuthority extends string
-        ? WritableSignerAccount<TAccountAuthority> &
+        ? ReadonlySignerAccount<TAccountAuthority> &
             AccountSignerMeta<TAccountAuthority>
         : TAccountAuthority,
       TAccountVerifierProgram extends string
-        ? WritableAccount<TAccountVerifierProgram>
+        ? ReadonlyAccount<TAccountVerifierProgram>
         : TAccountVerifierProgram,
-      TAccountVerifierProgramData extends string
-        ? WritableAccount<TAccountVerifierProgramData>
-        : TAccountVerifierProgramData,
-      TAccountBpfLoaderUpgradableProgram extends string
-        ? ReadonlyAccount<TAccountBpfLoaderUpgradableProgram>
-        : TAccountBpfLoaderUpgradableProgram,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
@@ -133,8 +121,6 @@ export type EmergencyStopAsyncInput<
   TAccountVerifierEntry extends string = string,
   TAccountAuthority extends string = string,
   TAccountVerifierProgram extends string = string,
-  TAccountVerifierProgramData extends string = string,
-  TAccountBpfLoaderUpgradableProgram extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
@@ -152,16 +138,8 @@ export type EmergencyStopAsyncInput<
   /**
    * The program account of the verifier to be used Address is verified against VerifierEntry
    * Must be Unchecked as there could be any program ID here.
-   * This account will be closed by a CPI call to the Loader V3 and rent refunded to the authority
    */
   verifierProgram: Address<TAccountVerifierProgram>;
-  /** The Program Data account of the verifier to be closed */
-  verifierProgramData?: Address<TAccountVerifierProgramData>;
-  /**
-   * This is the Loader V3 BPF Upgrade program, Not written in Anchor so we cannot use the
-   * CPI extensions to automatically generate a secure CPI call and must do so manually
-   */
-  bpfLoaderUpgradableProgram: Address<TAccountBpfLoaderUpgradableProgram>;
   /** Required because we are closing accounts */
   systemProgram?: Address<TAccountSystemProgram>;
   selector: EmergencyStopInstructionDataArgs['selector'];
@@ -172,8 +150,6 @@ export async function getEmergencyStopInstructionAsync<
   TAccountVerifierEntry extends string,
   TAccountAuthority extends string,
   TAccountVerifierProgram extends string,
-  TAccountVerifierProgramData extends string,
-  TAccountBpfLoaderUpgradableProgram extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends Address = typeof VERIFIER_ROUTER_PROGRAM_ADDRESS,
 >(
@@ -182,8 +158,6 @@ export async function getEmergencyStopInstructionAsync<
     TAccountVerifierEntry,
     TAccountAuthority,
     TAccountVerifierProgram,
-    TAccountVerifierProgramData,
-    TAccountBpfLoaderUpgradableProgram,
     TAccountSystemProgram
   >,
   config?: { programAddress?: TProgramAddress }
@@ -194,8 +168,6 @@ export async function getEmergencyStopInstructionAsync<
     TAccountVerifierEntry,
     TAccountAuthority,
     TAccountVerifierProgram,
-    TAccountVerifierProgramData,
-    TAccountBpfLoaderUpgradableProgram,
     TAccountSystemProgram
   >
 > {
@@ -205,16 +177,11 @@ export async function getEmergencyStopInstructionAsync<
 
   // Original accounts.
   const originalAccounts = {
-    router: { value: input.router ?? null, isWritable: true },
+    router: { value: input.router ?? null, isWritable: false },
     verifierEntry: { value: input.verifierEntry ?? null, isWritable: true },
-    authority: { value: input.authority ?? null, isWritable: true },
-    verifierProgram: { value: input.verifierProgram ?? null, isWritable: true },
-    verifierProgramData: {
-      value: input.verifierProgramData ?? null,
-      isWritable: true,
-    },
-    bpfLoaderUpgradableProgram: {
-      value: input.bpfLoaderUpgradableProgram ?? null,
+    authority: { value: input.authority ?? null, isWritable: false },
+    verifierProgram: {
+      value: input.verifierProgram ?? null,
       isWritable: false,
     },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
@@ -249,17 +216,6 @@ export async function getEmergencyStopInstructionAsync<
       ],
     });
   }
-  if (!accounts.verifierProgramData.value) {
-    accounts.verifierProgramData.value = await getProgramDerivedAddress({
-      programAddress:
-        'BPFLoaderUpgradeab1e11111111111111111111111' as Address<'BPFLoaderUpgradeab1e11111111111111111111111'>,
-      seeds: [
-        getAddressEncoder().encode(
-          expectAddress(accounts.verifierProgram.value)
-        ),
-      ],
-    });
-  }
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
       '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
@@ -272,8 +228,6 @@ export async function getEmergencyStopInstructionAsync<
       getAccountMeta(accounts.verifierEntry),
       getAccountMeta(accounts.authority),
       getAccountMeta(accounts.verifierProgram),
-      getAccountMeta(accounts.verifierProgramData),
-      getAccountMeta(accounts.bpfLoaderUpgradableProgram),
       getAccountMeta(accounts.systemProgram),
     ],
     data: getEmergencyStopInstructionDataEncoder().encode(
@@ -286,8 +240,6 @@ export async function getEmergencyStopInstructionAsync<
     TAccountVerifierEntry,
     TAccountAuthority,
     TAccountVerifierProgram,
-    TAccountVerifierProgramData,
-    TAccountBpfLoaderUpgradableProgram,
     TAccountSystemProgram
   >);
 }
@@ -297,8 +249,6 @@ export type EmergencyStopInput<
   TAccountVerifierEntry extends string = string,
   TAccountAuthority extends string = string,
   TAccountVerifierProgram extends string = string,
-  TAccountVerifierProgramData extends string = string,
-  TAccountBpfLoaderUpgradableProgram extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
@@ -316,16 +266,8 @@ export type EmergencyStopInput<
   /**
    * The program account of the verifier to be used Address is verified against VerifierEntry
    * Must be Unchecked as there could be any program ID here.
-   * This account will be closed by a CPI call to the Loader V3 and rent refunded to the authority
    */
   verifierProgram: Address<TAccountVerifierProgram>;
-  /** The Program Data account of the verifier to be closed */
-  verifierProgramData: Address<TAccountVerifierProgramData>;
-  /**
-   * This is the Loader V3 BPF Upgrade program, Not written in Anchor so we cannot use the
-   * CPI extensions to automatically generate a secure CPI call and must do so manually
-   */
-  bpfLoaderUpgradableProgram: Address<TAccountBpfLoaderUpgradableProgram>;
   /** Required because we are closing accounts */
   systemProgram?: Address<TAccountSystemProgram>;
   selector: EmergencyStopInstructionDataArgs['selector'];
@@ -336,8 +278,6 @@ export function getEmergencyStopInstruction<
   TAccountVerifierEntry extends string,
   TAccountAuthority extends string,
   TAccountVerifierProgram extends string,
-  TAccountVerifierProgramData extends string,
-  TAccountBpfLoaderUpgradableProgram extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends Address = typeof VERIFIER_ROUTER_PROGRAM_ADDRESS,
 >(
@@ -346,8 +286,6 @@ export function getEmergencyStopInstruction<
     TAccountVerifierEntry,
     TAccountAuthority,
     TAccountVerifierProgram,
-    TAccountVerifierProgramData,
-    TAccountBpfLoaderUpgradableProgram,
     TAccountSystemProgram
   >,
   config?: { programAddress?: TProgramAddress }
@@ -357,8 +295,6 @@ export function getEmergencyStopInstruction<
   TAccountVerifierEntry,
   TAccountAuthority,
   TAccountVerifierProgram,
-  TAccountVerifierProgramData,
-  TAccountBpfLoaderUpgradableProgram,
   TAccountSystemProgram
 > {
   // Program address.
@@ -367,16 +303,11 @@ export function getEmergencyStopInstruction<
 
   // Original accounts.
   const originalAccounts = {
-    router: { value: input.router ?? null, isWritable: true },
+    router: { value: input.router ?? null, isWritable: false },
     verifierEntry: { value: input.verifierEntry ?? null, isWritable: true },
-    authority: { value: input.authority ?? null, isWritable: true },
-    verifierProgram: { value: input.verifierProgram ?? null, isWritable: true },
-    verifierProgramData: {
-      value: input.verifierProgramData ?? null,
-      isWritable: true,
-    },
-    bpfLoaderUpgradableProgram: {
-      value: input.bpfLoaderUpgradableProgram ?? null,
+    authority: { value: input.authority ?? null, isWritable: false },
+    verifierProgram: {
+      value: input.verifierProgram ?? null,
       isWritable: false,
     },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
@@ -402,8 +333,6 @@ export function getEmergencyStopInstruction<
       getAccountMeta(accounts.verifierEntry),
       getAccountMeta(accounts.authority),
       getAccountMeta(accounts.verifierProgram),
-      getAccountMeta(accounts.verifierProgramData),
-      getAccountMeta(accounts.bpfLoaderUpgradableProgram),
       getAccountMeta(accounts.systemProgram),
     ],
     data: getEmergencyStopInstructionDataEncoder().encode(
@@ -416,8 +345,6 @@ export function getEmergencyStopInstruction<
     TAccountVerifierEntry,
     TAccountAuthority,
     TAccountVerifierProgram,
-    TAccountVerifierProgramData,
-    TAccountBpfLoaderUpgradableProgram,
     TAccountSystemProgram
   >);
 }
@@ -443,18 +370,10 @@ export type ParsedEmergencyStopInstruction<
     /**
      * The program account of the verifier to be used Address is verified against VerifierEntry
      * Must be Unchecked as there could be any program ID here.
-     * This account will be closed by a CPI call to the Loader V3 and rent refunded to the authority
      */
     verifierProgram: TAccountMetas[3];
-    /** The Program Data account of the verifier to be closed */
-    verifierProgramData: TAccountMetas[4];
-    /**
-     * This is the Loader V3 BPF Upgrade program, Not written in Anchor so we cannot use the
-     * CPI extensions to automatically generate a secure CPI call and must do so manually
-     */
-    bpfLoaderUpgradableProgram: TAccountMetas[5];
     /** Required because we are closing accounts */
-    systemProgram: TAccountMetas[6];
+    systemProgram: TAccountMetas[4];
   };
   data: EmergencyStopInstructionData;
 };
@@ -467,7 +386,7 @@ export function parseEmergencyStopInstruction<
     InstructionWithAccounts<TAccountMetas> &
     InstructionWithData<ReadonlyUint8Array>
 ): ParsedEmergencyStopInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 7) {
+  if (instruction.accounts.length < 5) {
     // TODO: Coded error.
     throw new Error('Not enough accounts');
   }
@@ -484,8 +403,6 @@ export function parseEmergencyStopInstruction<
       verifierEntry: getNextAccount(),
       authority: getNextAccount(),
       verifierProgram: getNextAccount(),
-      verifierProgramData: getNextAccount(),
-      bpfLoaderUpgradableProgram: getNextAccount(),
       systemProgram: getNextAccount(),
     },
     data: getEmergencyStopInstructionDataDecoder().decode(instruction.data),
