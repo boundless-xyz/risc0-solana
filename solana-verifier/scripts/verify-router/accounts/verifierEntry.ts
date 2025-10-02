@@ -17,6 +17,8 @@ import {
   fixEncoderSize,
   getAddressDecoder,
   getAddressEncoder,
+  getBooleanDecoder,
+  getBooleanEncoder,
   getBytesDecoder,
   getBytesEncoder,
   getStructDecoder,
@@ -49,11 +51,13 @@ export type VerifierEntry = {
   discriminator: ReadonlyUint8Array;
   selector: ReadonlyUint8Array;
   verifier: Address;
+  estopped: boolean;
 };
 
 export type VerifierEntryArgs = {
   selector: ReadonlyUint8Array;
   verifier: Address;
+  estopped: boolean;
 };
 
 export function getVerifierEntryEncoder(): FixedSizeEncoder<VerifierEntryArgs> {
@@ -62,6 +66,7 @@ export function getVerifierEntryEncoder(): FixedSizeEncoder<VerifierEntryArgs> {
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
       ['selector', fixEncoderSize(getBytesEncoder(), 4)],
       ['verifier', getAddressEncoder()],
+      ['estopped', getBooleanEncoder()],
     ]),
     (value) => ({ ...value, discriminator: VERIFIER_ENTRY_DISCRIMINATOR })
   );
@@ -72,6 +77,7 @@ export function getVerifierEntryDecoder(): FixedSizeDecoder<VerifierEntry> {
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
     ['selector', fixDecoderSize(getBytesDecoder(), 4)],
     ['verifier', getAddressDecoder()],
+    ['estopped', getBooleanDecoder()],
   ]);
 }
 
@@ -140,5 +146,5 @@ export async function fetchAllMaybeVerifierEntry(
 }
 
 export function getVerifierEntrySize(): number {
-  return 44;
+  return 45;
 }

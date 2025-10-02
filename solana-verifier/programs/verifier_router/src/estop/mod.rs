@@ -37,7 +37,6 @@ use anchor_lang::solana_program::bpf_loader_upgradeable;
 pub struct EmergencyStop<'info> {
     /// The router account PDA managing verifiers and required Upgrade Authority address of verifier
     #[account(
-        mut,
         seeds = [b"router"],
         bump
     )]
@@ -54,21 +53,18 @@ pub struct EmergencyStop<'info> {
         bump,
         constraint = verifier_entry.selector == selector,
         constraint = verifier_entry.verifier == verifier_program.key(),
-        close = authority
     )]
     pub verifier_entry: Account<'info, VerifierEntry>,
 
     /// The authority attempting the emergency stop (either the router owner OR the person presenting proof of exploit)
     /// The authority will get the rent refund of both the program account of the verifier and the verifierEntry account
-    #[account(mut)]
+    #[account()]
     pub authority: Signer<'info>,
 
     /// The program account of the verifier to be used Address is verified against VerifierEntry
     /// Must be Unchecked as there could be any program ID here.
-    /// This account will be closed by a CPI call to the Loader V3 and rent refunded to the authority
     /// CHECK: This program is deployed and checked against our PDA entries
     #[account(
-        mut,
         executable,
         constraint = verifier_program.key() == verifier_entry.verifier @ RouterError::InvalidVerifier)
         ]
@@ -76,7 +72,6 @@ pub struct EmergencyStop<'info> {
 
     /// The Program Data account of the verifier to be closed
     #[account(
-        mut,
         seeds = [
             verifier_program.key().as_ref()
         ],
@@ -121,14 +116,8 @@ pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: Selector) 
         .ownership
         .assert_owner(&ctx.accounts.authority)?;
 
-    close_verifier(
-        &ctx.accounts.router,
-        ctx.bumps.router,
-        &ctx.accounts.authority,
-        &ctx.accounts.verifier_program,
-        &ctx.accounts.verifier_program_data,
-        &ctx.accounts.bpf_loader_upgradable_program,
-    )?;
+    let verifier = &mut ctx.accounts.verifier_entry;
+    verifier.estopped = true;
 
     emit!(EmergencyStopEvent {
         router: ctx.accounts.router.key(),
@@ -137,59 +126,6 @@ pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: Selector) 
         triggered_by: ctx.accounts.authority.key(),
         reason: "Owner has revoked the verifier.".to_string()
     });
-
-    Ok(())
-}
-
-/// Closes a verifier program by closing its program data account
-///
-/// Internal function used by emergency stop operations to close a verifier's
-/// program data account and transfer the rent to a recipient.
-///
-/// # Arguments
-/// * `router` - The router account managing the verifiers and the upgrade authority of the verifier
-/// * `router_bumps` - Bump seed for the router's PDA
-/// * `recipient` - Account that will receive the returned rent
-/// * `verifier_program` - The program account of the verifier being closed
-/// * `verifier_program_data` - The program data account of the verifier being closed
-/// * `loader_v3` - The BPF loader program account
-///
-/// # Returns
-/// * `Ok(())` if the verifier is successfully closed
-/// * `Err` if the CPI to close the program fails
-///
-/// # Security Considerations
-/// * Only callable by emergency stop functions
-/// * Requires router signer seeds for CPI authorization
-/// * Transfers rent to the specified recipient
-fn close_verifier<'info>(
-    router: &Account<'info, VerifierRouter>,
-    router_bumps: u8,
-    recipient: &Signer<'info>,
-    verifier_program: &UncheckedAccount<'info>,
-    verifier_program_data: &Account<'info, ProgramData>,
-    loader_v3: &UncheckedAccount<'info>,
-) -> Result<()> {
-    let router_seed = &[b"router".as_ref(), &[router_bumps]];
-
-    let close_instruction = bpf_loader_upgradeable::close_any(
-        &verifier_program_data.key(),
-        &recipient.key(),
-        Some(&router.key()),
-        Some(&verifier_program.key()),
-    );
-
-    invoke_signed(
-        &close_instruction,
-        &[
-            verifier_program_data.to_account_info(),
-            recipient.to_account_info(),
-            router.to_account_info(),
-            verifier_program.to_account_info(),
-            loader_v3.to_account_info(),
-        ],
-        &[router_seed],
-    )?;
 
     Ok(())
 }
@@ -241,14 +177,8 @@ pub fn emergency_stop_with_proof(
     // > If the callee returns an error or aborts then the entire transaction will immediately fail.
     let _ = groth_16_verifier::cpi::verify(verify_ctx, proof, zero_array, zero_array);
 
-    close_verifier(
-        &ctx.accounts.router,
-        ctx.bumps.router,
-        &ctx.accounts.authority,
-        &ctx.accounts.verifier_program,
-        &ctx.accounts.verifier_program_data,
-        &ctx.accounts.bpf_loader_upgradable_program,
-    )?;
+    let verifier = &mut ctx.accounts.verifier_entry;
+    verifier.estopped = true;
 
     emit!(EmergencyStopEvent {
         router: ctx.accounts.router.key(),

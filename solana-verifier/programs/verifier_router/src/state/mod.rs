@@ -41,8 +41,10 @@ pub struct VerifierRouter {
 /// # Fields
 /// * `selector` - Unique identifier for this verifier entry
 /// * `verifier` - Public key of the verifier program
+/// * `estopped` - Boolean flag indicating if the verifier has been emergency stopped
 #[account]
 pub struct VerifierEntry {
     pub selector: Selector,
     pub verifier: Pubkey,
+    pub estopped: bool,
 }

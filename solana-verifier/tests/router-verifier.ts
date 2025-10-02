@@ -417,13 +417,11 @@ describe("verifier-router", () => {
 
     await sendTx(estopProofInstruction);
 
-    const verifierEntry = await fetchMaybeVerifierEntry(
+    const verifierEntry = await fetchVerifierEntry(
       rpc,
       badVerifierPDAAddress
     );
-    expect(verifierEntry.exists).to.equal(false);
-
-    const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
+    expect(verifierEntry.data.estopped).to.equal(true);
   });
 
   it("Should allow an owner to call estop", async () => {
@@ -439,10 +437,8 @@ describe("verifier-router", () => {
 
     await sendTx(estopProofInstruction);
 
-    const verifierEntry = await fetchMaybeVerifierEntry(rpc, grothPDAAddress);
-    expect(verifierEntry.exists).to.equal(false);
-
-    const routerAccount = await fetchVerifierRouter(rpc, routerAddress);
+    const verifierEntry = await fetchVerifierEntry(rpc, grothPDAAddress);
+    expect(verifierEntry.data.estopped).to.equal(true);
   });
 
   it("should not allow a user to submit a valid proof to the verifier after e-stop was called on it", async () => {
@@ -458,6 +454,6 @@ describe("verifier-router", () => {
       journalDigest: emptyJournalDigest,
     });
 
-    await expectError(sendTx(verifyInstruction), "AccountNotInitialized");
+    await expectError(sendTx(verifyInstruction), "SelectorDeactivated");
   });
 });

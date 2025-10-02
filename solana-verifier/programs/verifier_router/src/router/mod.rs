@@ -74,7 +74,7 @@ pub struct AddVerifier<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 4,
+        space = 8 + 32 + 4 + 1,
         seeds = [
             b"verifier",
             selector.as_ref(),
@@ -175,14 +175,14 @@ pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
 /// the router is both Upgradable (via Loader V3) and has the Upgrade authority
 /// set to the router PDA address.
 ///
+/// Note this will fail if the selector is already in use. This is a desirable effect.
+///
 /// # Arguments
 /// * `ctx` - The AddVerifier context containing validated accounts
 /// * `selector` - The selector to associate with this verifier
 ///
 /// # Returns
 /// * `Ok(())` if the verifier is successfully added
-/// * `Err(RouterError::SelectorInvalid)` if the selector is invalid (not exactly one greater
-///                                       then current verifier count)
 /// * `Err(RouterError::VerifierInvalidAuthority)` if the router PDA is not the upgrade authority
 pub fn add_verifier(ctx: Context<AddVerifier>, selector: Selector) -> Result<()> {
     // Verify the caller is the owner of the contract
@@ -221,6 +221,9 @@ pub fn verify(
 ) -> Result<()> {
     if ctx.accounts.verifier_entry.selector != seal.selector {
         return err!(RouterError::InvalidVerifier);
+    }
+    if ctx.accounts.verifier_entry.estopped {
+        return err!(RouterError::SelectorDeactivated);
     }
 
     let verifier_program = ctx.accounts.verifier_program.to_account_info();
