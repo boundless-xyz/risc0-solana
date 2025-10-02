@@ -57,6 +57,7 @@ import {
   loadMinimumScriptBalance,
   Programs,
   verifiable,
+  getSelector,
 } from "./utils/utils";
 import { initializeRouter } from "./utils/init";
 import { addVerifier } from "./utils/addVerifier";
@@ -70,7 +71,7 @@ async function run_deployment(): Promise<void> {
   const deployer = await getLocalKeypair();
   const verify = verifiable();
   const rpc = createRpc();
-  const selector = new Uint8Array([115, 196, 87, 186]);
+  const selector = getSelector();
 
   logger.info("Checking account balances before starting deploy.");
 

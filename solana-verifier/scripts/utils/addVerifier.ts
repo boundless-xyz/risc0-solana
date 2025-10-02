@@ -64,7 +64,7 @@ export async function addVerifier(
   );
 
   logger.info(
-    `Using [${selector}] as the selector for the verifier at address ${verifierAddress}`
+    `Using 0x${Buffer.from(selector).toString("hex")} as the selector for the verifier at address ${verifierAddress}`
   );
 
   const routerEntry = await getVerifierEntryPda(routerAddress, selector);
