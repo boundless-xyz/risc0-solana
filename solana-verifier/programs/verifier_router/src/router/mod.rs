@@ -19,6 +19,7 @@ pub use error::RouterError;
 pub use groth_16_verifier::{Proof, PublicInputs, VerificationKey};
 
 use crate::state::{VerifierEntry, VerifierRouter};
+use crate::{Seal, Selector};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::bpf_loader_upgradeable;
 use groth_16_verifier::cpi::accounts::VerifyProof;
@@ -59,7 +60,7 @@ pub struct Initialize<'info> {
 /// * Ensures sequential selector assignment
 /// * Creates a PDA for the verifier entry with seeds = [b"verifier", selector_bytes]
 #[derive(Accounts)]
-#[instruction(selector: u32)]
+#[instruction(selector: Selector)]
 pub struct AddVerifier<'info> {
     /// The router account PDA managing verifiers and required Upgrade Authority address of verifier
     #[account(
@@ -69,17 +70,16 @@ pub struct AddVerifier<'info> {
     )]
     pub router: Account<'info, VerifierRouter>,
 
-    /// The new verifier entry to be created which must have a selector in sequential order
+    /// The new verifier entry to be created
     #[account(
         init,
         payer = authority,
         space = 8 + 32 + 4,
         seeds = [
             b"verifier",
-            selector.to_le_bytes().as_ref()
+            selector.as_ref(),
         ],
         bump,
-        constraint = selector == router.verifier_count + 1 @ RouterError::SelectorInvalid
     )]
     pub verifier_entry: Account<'info, VerifierEntry>,
 
@@ -116,9 +116,9 @@ pub struct AddVerifier<'info> {
 /// Ensures a program is not attempting to use a selector which had been E-Stopped.
 ///
 /// # Arguments
-/// * `selector` - A u32 that uniquely identifies the verifier entry
+/// * `selector` - A 4-byte value that uniquely identifies the verifier entry
 #[derive(Accounts)]
-#[instruction(selector: u32)]
+#[instruction(seal: Seal)]
 pub struct Verify<'info> {
     /// The router account PDA managing verifiers
     #[account(
@@ -131,10 +131,10 @@ pub struct Verify<'info> {
     #[account(
        seeds = [
             b"verifier",
-            selector.to_le_bytes().as_ref()
+            seal.selector.as_ref()
        ],
        bump,
-       constraint = verifier_entry.selector == selector,
+       constraint = verifier_entry.selector == seal.selector,
    )]
     pub verifier_entry: Account<'info, VerifierEntry>,
 
@@ -165,7 +165,6 @@ pub struct Verify<'info> {
 pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
     let router = &mut ctx.accounts.router;
     router.ownership = Ownership::new(ctx.accounts.authority.key())?;
-    router.verifier_count = 0;
     Ok(())
 }
 
@@ -179,31 +178,23 @@ pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
 /// # Arguments
 /// * `ctx` - The AddVerifier context containing validated accounts
 /// * `selector` - The selector to associate with this verifier
-///                (must be one higher then the current verifier count)
 ///
 /// # Returns
 /// * `Ok(())` if the verifier is successfully added
 /// * `Err(RouterError::SelectorInvalid)` if the selector is invalid (not exactly one greater
 ///                                       then current verifier count)
 /// * `Err(RouterError::VerifierInvalidAuthority)` if the router PDA is not the upgrade authority
-/// * `Err(RouterError::Overflow)` if adding the verifier would overflow the counter (highly unlikely)
-pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
+pub fn add_verifier(ctx: Context<AddVerifier>, selector: Selector) -> Result<()> {
     // Verify the caller is the owner of the contract
     ctx.accounts
         .router
         .ownership
         .assert_owner(&ctx.accounts.authority)?;
 
-    let router = &mut ctx.accounts.router;
     let entry = &mut ctx.accounts.verifier_entry;
 
     entry.selector = selector;
     entry.verifier = ctx.accounts.verifier_program.key();
-
-    router.verifier_count = router
-        .verifier_count
-        .checked_add(1)
-        .ok_or(error!(RouterError::Overflow))?;
 
     Ok(())
 }
@@ -224,15 +215,19 @@ pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
 /// * `Err` if verification fails or the verifier returns an error
 pub fn verify(
     ctx: Context<Verify>,
-    proof: Proof,
+    seal: Seal,
     image_id: [u8; 32],
     journal_digest: [u8; 32],
 ) -> Result<()> {
+    if ctx.accounts.verifier_entry.selector != seal.selector {
+        return err!(RouterError::InvalidVerifier);
+    }
+
     let verifier_program = ctx.accounts.verifier_program.to_account_info();
     let verifier_accounts = VerifyProof {
         system_program: ctx.accounts.system_program.to_account_info(),
     };
 
     let verify_ctx = CpiContext::new(verifier_program, verifier_accounts);
-    groth_16_verifier::cpi::verify(verify_ctx, proof, image_id, journal_digest)
+    groth_16_verifier::cpi::verify(verify_ctx, seal.proof, image_id, journal_digest)
 }

@@ -16,9 +16,13 @@ no-idl = []
 no-log-ix-name = []
 idl-build = ["anchor-lang/idl-build"]
 anchor-debug = ["anchor-lang/anchor-debug"]
+client = ["dep:risc0-zkvm"]
 
 [dependencies]
 anchor-lang = "0.31.1"
 ownable = { path = "../../../solana-ownable/ownable"}
 groth_16_verifier = { path = "../groth_16_verifier", features = ["cpi"] }
+risc0-zkvm = { version = "3.0.3", default-features = false, optional = true }
 
+[dev-dependencies]
+risc0-zkvm = { version = "3.0.3", default-features = false }

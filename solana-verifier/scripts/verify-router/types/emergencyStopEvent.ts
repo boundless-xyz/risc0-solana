@@ -10,8 +10,12 @@ import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
   combineCodec,
+  fixDecoderSize,
+  fixEncoderSize,
   getAddressDecoder,
   getAddressEncoder,
+  getBytesDecoder,
+  getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
   getU32Decoder,
@@ -22,6 +26,7 @@ import {
   type Codec,
   type Decoder,
   type Encoder,
+  type ReadonlyUint8Array,
 } from '@solana/kit';
 
 /**
@@ -36,7 +41,7 @@ import {
  */
 export type EmergencyStopEvent = {
   router: Address;
-  selector: number;
+  selector: ReadonlyUint8Array;
   verifier: Address;
   triggeredBy: Address;
   reason: string;
@@ -47,7 +52,7 @@ export type EmergencyStopEventArgs = EmergencyStopEvent;
 export function getEmergencyStopEventEncoder(): Encoder<EmergencyStopEventArgs> {
   return getStructEncoder([
     ['router', getAddressEncoder()],
-    ['selector', getU32Encoder()],
+    ['selector', fixEncoderSize(getBytesEncoder(), 4)],
     ['verifier', getAddressEncoder()],
     ['triggeredBy', getAddressEncoder()],
     ['reason', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
@@ -57,7 +62,7 @@ export function getEmergencyStopEventEncoder(): Encoder<EmergencyStopEventArgs> 
 export function getEmergencyStopEventDecoder(): Decoder<EmergencyStopEvent> {
   return getStructDecoder([
     ['router', getAddressDecoder()],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
     ['verifier', getAddressDecoder()],
     ['triggeredBy', getAddressDecoder()],
     ['reason', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],

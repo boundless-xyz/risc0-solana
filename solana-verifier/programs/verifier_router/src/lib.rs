@@ -17,6 +17,9 @@
 use anchor_lang::prelude::*;
 use groth_16_verifier::Proof;
 
+#[cfg(any(feature = "client", test))]
+pub mod client;
+
 pub mod estop;
 pub mod router;
 pub mod state;
@@ -27,6 +30,16 @@ use router::*;
 use state::*;
 
 declare_id!("6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7");
+
+pub type Selector = [u8; 4];
+
+/// An encoded RISC Zero proof along with a selector
+/// which encodes the required verifier version
+#[derive(Clone, PartialEq, Eq, AnchorDeserialize, AnchorSerialize)]
+pub struct Seal {
+    pub selector: Selector,
+    pub proof: Proof,
+}
 
 /// Verifier Router Program for Anchor
 ///
@@ -49,29 +62,28 @@ pub mod verifier_router {
         router::initialize(ctx)
     }
 
-    pub fn add_verifier(ctx: Context<AddVerifier>, selector: u32) -> Result<()> {
+    pub fn add_verifier(ctx: Context<AddVerifier>, selector: Selector) -> Result<()> {
         // This function checks ownership and can only be called by the owner
         router::add_verifier(ctx, selector)
     }
 
     pub fn verify(
         ctx: Context<Verify>,
-        _selector: u32,
-        proof: Proof,
+        seal: Seal,
         image_id: [u8; 32],
         journal_digest: [u8; 32],
     ) -> Result<()> {
-        router::verify(ctx, proof, image_id, journal_digest)
+        router::verify(ctx, seal, image_id, journal_digest)
     }
 
-    pub fn emergency_stop(ctx: Context<EmergencyStop>, selector: u32) -> Result<()> {
+    pub fn emergency_stop(ctx: Context<EmergencyStop>, selector: Selector) -> Result<()> {
         // This function checks ownership and can only be called by the owner
         estop::emergency_stop_by_owner(ctx, selector)
     }
 
     pub fn emergency_stop_with_proof(
         ctx: Context<EmergencyStop>,
-        selector: u32,
+        selector: Selector,
         proof: Proof,
     ) -> Result<()> {
         estop::emergency_stop_with_proof(ctx, selector, proof)

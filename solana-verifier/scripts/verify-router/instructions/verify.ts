@@ -15,8 +15,6 @@ import {
   getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
-  getU32Decoder,
-  getU32Encoder,
   transformEncoder,
   type AccountMeta,
   type Address,
@@ -30,11 +28,7 @@ import {
   type ReadonlyUint8Array,
 } from '@solana/kit';
 import { VERIFIER_ROUTER_PROGRAM_ADDRESS } from '../programs';
-import {
-  expectSome,
-  getAccountMetaFactory,
-  type ResolvedAccount,
-} from '../shared';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 import {
   getProofDecoder,
   getProofEncoder,
@@ -81,14 +75,14 @@ export type VerifyInstruction<
 
 export type VerifyInstructionData = {
   discriminator: ReadonlyUint8Array;
-  selector: number;
+  selector: ReadonlyUint8Array;
   proof: Proof;
   imageId: ReadonlyUint8Array;
   journalDigest: ReadonlyUint8Array;
 };
 
 export type VerifyInstructionDataArgs = {
-  selector: number;
+  selector: ReadonlyUint8Array;
   proof: ProofArgs;
   imageId: ReadonlyUint8Array;
   journalDigest: ReadonlyUint8Array;
@@ -98,7 +92,7 @@ export function getVerifyInstructionDataEncoder(): FixedSizeEncoder<VerifyInstru
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['selector', getU32Encoder()],
+      ['selector', fixEncoderSize(getBytesEncoder(), 4)],
       ['proof', getProofEncoder()],
       ['imageId', fixEncoderSize(getBytesEncoder(), 32)],
       ['journalDigest', fixEncoderSize(getBytesEncoder(), 32)],
@@ -110,7 +104,7 @@ export function getVerifyInstructionDataEncoder(): FixedSizeEncoder<VerifyInstru
 export function getVerifyInstructionDataDecoder(): FixedSizeDecoder<VerifyInstructionData> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['selector', getU32Decoder()],
+    ['selector', fixDecoderSize(getBytesDecoder(), 4)],
     ['proof', getProofDecoder()],
     ['imageId', fixDecoderSize(getBytesDecoder(), 32)],
     ['journalDigest', fixDecoderSize(getBytesDecoder(), 32)],
@@ -136,7 +130,7 @@ export type VerifyAsyncInput<
   /** The router account PDA managing verifiers */
   router?: Address<TAccountRouter>;
   /** The verifier entry to use, validated using PDA derivation */
-  verifierEntry?: Address<TAccountVerifierEntry>;
+  verifierEntry: Address<TAccountVerifierEntry>;
   /**
    * The verifier program to be invoked
    * Must match the address of the program listed in the verifier entry of the specific selector
@@ -203,17 +197,6 @@ export async function getVerifyInstructionAsync<
         getBytesEncoder().encode(
           new Uint8Array([114, 111, 117, 116, 101, 114])
         ),
-      ],
-    });
-  }
-  if (!accounts.verifierEntry.value) {
-    accounts.verifierEntry.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([118, 101, 114, 105, 102, 105, 101, 114])
-        ),
-        getU32Encoder().encode(expectSome(args.selector)),
       ],
     });
   }

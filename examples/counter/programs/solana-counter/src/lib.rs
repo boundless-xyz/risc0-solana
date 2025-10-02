@@ -22,6 +22,7 @@ use verifier_router::cpi::accounts::Verify;
 use verifier_router::program::VerifierRouter as VerifierRouterProgram;
 use verifier_router::router::Proof;
 use verifier_router::state::{VerifierEntry, VerifierRouter};
+use verifier_router::Seal;
 
 declare_id!("4fm3W45jqszZmQi3X7C3Y2yfWowTteUfXVhrhugQFXZY");
 
@@ -36,8 +37,7 @@ pub mod solana_examples {
     /// nonce. We may want to allow changing the selector so that we can use different verifiers in the future.
     /// The image ID is tightly coupled with our guest program and prevents a user from changing the off-chain
     /// executable code and still getting a valid transaction.
-    pub fn initialize(ctx: Context<Initialize>, selector: u32, image_id: [u8; 32]) -> Result<()> {
-        ctx.accounts.program_data.selector = selector;
+    pub fn initialize(ctx: Context<Initialize>, image_id: [u8; 32]) -> Result<()> {
         ctx.accounts.program_data.nonce = 0;
         ctx.accounts.program_data.image_id = image_id;
         Ok(())
@@ -51,7 +51,7 @@ pub mod solana_examples {
     /// it accepts the transaction.
     pub fn increment_nonce(
         ctx: Context<IncrementNonce>,
-        proof: Proof,
+        seal: Seal,
         journal_outputs: Vec<u8>,
     ) -> Result<()> {
         // We use Borsh to deserialize the data from the journal
@@ -87,16 +87,13 @@ pub mod solana_examples {
         // a proof generated from a modified program
         let image_id = ctx.accounts.program_data.image_id;
 
-        // We pass the selector for the proof verifier that we are currently using
-        let selector = ctx.accounts.program_data.selector;
-
         // We setup our CPI context for the router
         let cpi_ctx = CpiContext::new(ctx.accounts.router.to_account_info(), cpi_accounts);
 
         // We make the CPI call to the RISC Zero Verifier Router which if it returns means the proof is valid
         // In Solana you cannot recover from a CPI call which returns an error, to make this clear I explicitly unwrap although
         // behavior would be the same if I ignored the result.
-        verifier_router::cpi::verify(cpi_ctx, selector, proof, image_id, journal_digest).unwrap();
+        verifier_router::cpi::verify(cpi_ctx, seal, image_id, journal_digest).unwrap();
 
         // If we reached this line it means that our proof was valid and we modify the program state as appropriate
         ctx.accounts.program_data.nonce += 1;
@@ -108,7 +105,6 @@ pub mod solana_examples {
 /// Data account used for storing our current nonce value, the immutable image_id and verifier selector values
 #[account]
 pub struct ProgramData {
-    pub selector: u32,
     pub nonce: u32,
     pub image_id: [u8; 32],
 }
@@ -120,7 +116,7 @@ pub struct Initialize<'info> {
         payer = authority,
         seeds = [b"data"],
         bump,
-        space = 8 + 4 + 4 + 32 // discriminator + selector + nonce + image_id
+        space = 8 + 4 + 32 // discriminator + nonce + image_id
     )]
     pub program_data: Account<'info, ProgramData>,
 
@@ -132,6 +128,7 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(seal: Seal)]
 pub struct IncrementNonce<'info> {
     #[account(mut)]
     pub program_data: Account<'info, ProgramData>,
@@ -147,7 +144,7 @@ pub struct IncrementNonce<'info> {
     #[account(
         seeds = [
             b"verifier",
-            &program_data.selector.to_le_bytes()
+            seal.selector.as_ref()
         ],
         bump,
         seeds::program = verifier_router::ID,

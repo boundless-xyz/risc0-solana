@@ -331,10 +331,10 @@ export async function getRouterPda(
  */
 export async function getVerifierEntryPda(
   routerAddress: Address<string>,
-  selector: number
+  selector: Uint8Array
 ): Promise<PDA> {
   const routerPda = await getRouterPda(routerAddress);
-  const selectorSeed = getU32Codec().encode(selector);
+  const selectorSeed = selector;
   const pda = await getProgramDerivedAddress({
     programAddress: routerAddress,
     seeds: ["verifier", selectorSeed],
@@ -620,6 +620,23 @@ export function verifiable(): boolean {
 }
 
 /**
+ * Checks if verifiable builds are enabled
+ *
+ * @notice Uses the VERIFIABLE environment variable
+ * @returns true if verifiable builds are enabled
+ */
+export function getSelector(): Uint8Array {
+  const selector_env = process.env.SELECTOR;
+  if (selector_env === undefined) {
+    logger.debug("SELECTOR not set");
+    throw new Error("SELECTOR environment variable is required");
+  }
+  const selector = parseHex(selector_env, 4);
+  logger.debug(`Selector: ${selector}`);
+  return selector;
+}
+
+/**
  * Interface for Solana RPC connections
  *
  * @property rpc - Standard RPC connection
@@ -648,6 +665,29 @@ function parseBoolean(value: string): boolean {
     return false;
   }
   return ["true", "on", "yes"].includes(value.toLowerCase());
+}
+
+/**
+ * Parses a hex string into a uint8 array
+ *
+ * @param value - String to parse
+ * @returns Parsed value
+ */
+function parseHex(value: string, length: number): Uint8Array {
+  // Normalize: remove optional "0x" prefix
+  if (value.startsWith("0x") || value.startsWith("0X")) {
+    value = value.slice(2);
+  }
+
+  if (value.length !== length * 2) {
+    throw new Error(`Expected ${length} bytes (${2*length} hex chars), got ${value.length}`);
+  }
+
+  const arr = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    arr[i] = parseInt(value.slice(i * 2, i * 2 + 2), 16);
+  }
+  return arr;
 }
 
 /**

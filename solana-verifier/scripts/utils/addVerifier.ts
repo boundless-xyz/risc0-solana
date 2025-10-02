@@ -14,7 +14,6 @@ import {
   createLogger,
 } from "./utils";
 import {
-  fetchVerifierRouter,
   getAddVerifierInstruction,
 } from "../verify-router";
 
@@ -49,7 +48,8 @@ export async function addVerifier(
   rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>,
   verifierAddress: Address<string>,
   routerAddress: Address<string>,
-  owner: TransactionSigner
+  owner: TransactionSigner,
+  selector: Uint8Array,
 ): Promise<void> {
   logger.info(
     `RISC Zero Verifier being with address: ${verifierAddress} being added to the router at address: ${routerAddress}`
@@ -63,16 +63,8 @@ export async function addVerifier(
     `Router PDA address is: ${routerPDA.address} and the bump is: ${routerPDA.bump}`
   );
 
-  const routerData = await fetchVerifierRouter(rpc, routerPDA.address);
-
-  logger.debug(
-    `Current verifier entry count is ${routerData.data.verifierCount}`
-  );
-
-  const selector = routerData.data.verifierCount + 1;
-
   logger.info(
-    `Using ${selector} as the selector for the verifier at address ${verifierAddress}`
+    `Using 0x${Buffer.from(selector).toString("hex")} as the selector for the verifier at address ${verifierAddress}`
   );
 
   const routerEntry = await getVerifierEntryPda(routerAddress, selector);

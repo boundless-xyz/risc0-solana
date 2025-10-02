@@ -20,7 +20,7 @@ use groth_16_verifier::cpi::accounts::VerifyProof;
 use groth_16_verifier::Proof;
 pub mod events;
 use crate::state::{VerifierEntry, VerifierRouter};
-use crate::RouterError;
+use crate::{RouterError, Selector};
 use events::EmergencyStopEvent;
 
 use anchor_lang::solana_program::bpf_loader_upgradeable;
@@ -33,7 +33,7 @@ use anchor_lang::solana_program::bpf_loader_upgradeable;
 /// # Arguments
 /// * `selector` - A u32 that uniquely identifies the verifier to stop
 #[derive(Accounts)]
-#[instruction(selector: u32)]
+#[instruction(selector: Selector)]
 pub struct EmergencyStop<'info> {
     /// The router account PDA managing verifiers and required Upgrade Authority address of verifier
     #[account(
@@ -49,7 +49,7 @@ pub struct EmergencyStop<'info> {
         mut,
         seeds = [
             b"verifier",
-            &selector.to_le_bytes()
+            selector.as_ref()
         ],
         bump,
         constraint = verifier_entry.selector == selector,
@@ -114,7 +114,7 @@ pub struct EmergencyStop<'info> {
 ///
 /// # Returns
 /// * `Ok(())` if the emergency stop is successful
-pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: u32) -> Result<()> {
+pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: Selector) -> Result<()> {
     // Verify the caller is Contract Owner
     ctx.accounts
         .router
@@ -221,7 +221,7 @@ fn close_verifier<'info>(
 /// * `Err(EstopError::InvalidProofOfExploit)` if the proof is invalid
 pub fn emergency_stop_with_proof(
     ctx: Context<EmergencyStop>,
-    selector: u32,
+    selector: Selector,
     proof: Proof,
 ) -> Result<()> {
     let zero_array = [0u8; 32];

@@ -16,6 +16,8 @@
 
 use anchor_lang::prelude::*;
 
+use crate::Selector;
+
 /// Event emitted when an emergency stop is executed on a verifier
 ///
 /// # Fields
@@ -27,7 +29,7 @@ use anchor_lang::prelude::*;
 #[event]
 pub struct EmergencyStopEvent {
     pub router: Pubkey,
-    pub selector: u32,
+    pub selector: Selector,
     pub verifier: Pubkey,
     pub triggered_by: Pubkey,
     pub reason: String,

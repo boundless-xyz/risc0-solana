@@ -8,8 +8,7 @@ methods = { path = "../methods" }
 shared = { path = "../../shared" }
 solana-counter = { path = "../../programs/solana-counter", features = ["no-entrypoint"] }
 groth_16_verifier = { path = "../../../../solana-verifier/programs/groth_16_verifier", features = ["no-entrypoint", "client"]}
-verifier_router = { path = "../../../../solana-verifier/programs/verifier_router", features = ["no-entrypoint"]}
-
+verifier_router = { path = "../../../../solana-verifier/programs/verifier_router", features = ["no-entrypoint", "client"]}
 risc0-zkvm = { version = "3.0.3", default-features = false, features = ["prove"]}
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anchor-client = { version = "0.31.1", features = ["async"]}
