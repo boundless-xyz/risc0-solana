@@ -17,6 +17,9 @@
 use anchor_lang::prelude::*;
 use groth_16_verifier::Proof;
 
+#[cfg(any(feature = "client", test))]
+pub mod client;
+
 pub mod estop;
 pub mod router;
 pub mod state;

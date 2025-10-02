@@ -8618,6 +8618,7 @@ dependencies = [
  "anchor-lang",
  "groth_16_verifier",
  "ownable",
+ "risc0-zkvm",
 ]
 
 [[package]]
