@@ -40,7 +40,6 @@ pub struct EmergencyStop<'info> {
     pub router: Account<'info, VerifierRouter>,
 
     /// The verifier entry of the program to be stopped.
-    /// This entry will be closed and refunded to the caller on successful stop
     #[account(
         mut,
         seeds = [
