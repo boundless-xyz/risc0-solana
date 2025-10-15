@@ -81,6 +81,13 @@ pub mod groth_16_verifier {
     use super::*;
 
     /// Verifies a RISC Zero zkVM Groth16 receipt
+    ///
+    /// WARNING: You almost never want to call this directly from your program and should call `verify` on the Verifier Router instead.
+    /// If you are calling this directly make sure you understand the implications and know what you are doing.
+    ///
+    /// Going through the router allows supporting multiple versions of the RISC Zero zkVM, and adds emergency stop capabilities.
+    /// If a soundness but is found in a version RISC Zero the router can freeze the affected verifier preventing further damage. Integrating with
+    /// the groth_16_verifier directly means you will not benefit from these protections.
     pub fn verify(
         _ctx: Context<VerifyProof>,
         proof: Proof,

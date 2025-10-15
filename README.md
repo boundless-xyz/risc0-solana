@@ -16,6 +16,9 @@ Our core verifier infrastructure allows secure on-chain verification of RISC Zer
 - Dynamic verifier routing and management
 - Emergency stop functionality for security
 
+> [!IMPORTANT]
+> If you want to verify RISC Zero proofs in your Solana program the Verifier Router is what you want to integrate with. See the [list of verifier router deployments](https://dev.risczero.com/api/blockchain-integration/contracts/verifier#verifier-router) to find the existing deployment for your chain. Do not deploy your own copies of the Groth16 verifier or Verifier Router unless you know what you are doing.
+
 ### Supporting Components
 
 We provide several supporting libraries to help developers integrate with the verifier:
