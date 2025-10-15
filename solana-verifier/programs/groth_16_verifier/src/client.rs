@@ -29,20 +29,6 @@ struct ProofJson {
     curve: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
-struct VerifyingKeyJson {
-    protocol: String,
-    curve: String,
-    #[serde(rename = "nPublic")]
-    nr_pubinputs: u32,
-    vk_alpha_1: Vec<String>,
-    vk_beta_2: Vec<Vec<String>>,
-    vk_gamma_2: Vec<Vec<String>>,
-    vk_delta_2: Vec<Vec<String>>,
-    #[serde(rename = "IC")]
-    vk_ic: Vec<Vec<String>>,
-}
-
 impl<'de> Deserialize<'de> for Proof {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

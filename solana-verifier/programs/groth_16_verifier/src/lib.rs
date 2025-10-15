@@ -113,6 +113,7 @@ pub fn hash_claim(image_id: &[u8; 32], journal_digest: &[u8; 32]) -> [u8; 32] {
 }
 
 /// Negate a BN254 G1 curve point
+/// Note: This does not check that the point is on the curve before negation
 pub fn negate_g1(point: &[u8; 64]) -> [u8; 64] {
     let mut negated_point = [0u8; 64];
     negated_point[..32].copy_from_slice(&point[..32]);
@@ -238,7 +239,7 @@ fn public_inputs(claim_digest: [u8; 32]) -> Result<PublicInputs<5>> {
     id.reverse();
 
     Ok(PublicInputs {
-        inputs: [a0, a1, c0, c1, to_field_element(&id)],
+        inputs: [a0, a1, c0, c1, to_field_element_unchecked(&id)],
     })
 }
 
@@ -246,11 +247,12 @@ fn public_inputs(claim_digest: [u8; 32]) -> Result<PublicInputs<5>> {
 fn split_digest(bytes: [u8; 32]) -> Result<([u8; 32], [u8; 32])> {
     let big_endian: Vec<u8> = bytes.iter().rev().copied().collect();
     let (b, a) = big_endian.split_at(big_endian.len() / 2);
-    Ok((to_field_element(a), to_field_element(b)))
+    Ok((to_field_element_unchecked(a), to_field_element_unchecked(b)))
 }
 
 /// Convert arbitrary bytes to 32-byte field element
-fn to_field_element(input: &[u8]) -> [u8; 32] {
+/// NOTE: This does not check that the result is a valid field element. This can be done with `verify_scalar_in_field`.
+fn to_field_element_unchecked(input: &[u8]) -> [u8; 32] {
     let mut fixed_array = [0u8; 32];
     let start_index = 32 - input.len();
     fixed_array[start_index..].copy_from_slice(input);

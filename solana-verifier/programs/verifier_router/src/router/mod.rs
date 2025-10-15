@@ -35,13 +35,13 @@ use ownable::Ownership;
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     /// The router account PDA to be initialized
-    /// Space allocated for discriminator + owner (Option<Pubkey>) + pending_owner: (Option<Pubkey>) + count (u32)
+    /// Space allocated for discriminator + owner (Option<Pubkey>) + pending_owner: (Option<Pubkey>)
     #[account(
        init,
        seeds = [b"router"],
        bump,
        payer = authority,
-       space = 8 + 33 + 33 + 4
+       space = 8 + 33 + 33
    )]
     pub router: Account<'info, VerifierRouter>,
 
@@ -64,7 +64,6 @@ pub struct Initialize<'info> {
 pub struct AddVerifier<'info> {
     /// The router account PDA managing verifiers and required Upgrade Authority address of verifier
     #[account(
-        mut,
         seeds = [b"router"],
         bump
     )]
@@ -219,12 +218,14 @@ pub fn verify(
     image_id: [u8; 32],
     journal_digest: [u8; 32],
 ) -> Result<()> {
-    if ctx.accounts.verifier_entry.selector != seal.selector {
-        return err!(RouterError::InvalidVerifier);
-    }
-    if ctx.accounts.verifier_entry.estopped {
-        return err!(RouterError::SelectorDeactivated);
-    }
+    require!(
+        ctx.accounts.verifier_entry.selector == seal.selector,
+        RouterError::InvalidVerifier
+    );
+    require!(
+        !ctx.accounts.verifier_entry.estopped,
+        RouterError::SelectorDeactivated
+    );
 
     let verifier_program = ctx.accounts.verifier_program.to_account_info();
     let verifier_accounts = VerifyProof {

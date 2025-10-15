@@ -41,8 +41,6 @@ pub fn encode_seal(seal: &[u8; 256]) -> Seal {
 /// parameters including the Groth16 verification key and the control IDs that commit to the RISC
 /// Zero circuits.
 pub fn encode_seal_with_selector(seal: &[u8; 256], selector: Selector) -> Seal {
-    let seal = seal.as_ref();
-
     // safe to unwrap as we know the seal length is 256 and can be split into these components
     let mut proof = Proof {
         pi_a: seal[0..64].try_into().unwrap(),

@@ -20,7 +20,6 @@ use borsh::BorshDeserialize;
 use shared::IncrementNonceArguments;
 use verifier_router::cpi::accounts::Verify;
 use verifier_router::program::VerifierRouter as VerifierRouterProgram;
-use verifier_router::router::Proof;
 use verifier_router::state::{VerifierEntry, VerifierRouter};
 use verifier_router::Seal;
 
