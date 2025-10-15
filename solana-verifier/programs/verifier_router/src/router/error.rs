@@ -24,4 +24,6 @@ pub enum RouterError {
     SelectorDeactivated,
     #[msg("Invalid verifier program")]
     InvalidVerifier,
+    #[msg("Authority used for initialization does not match the value expected by the program")]
+    InvalidInitializationAuthority,
 }

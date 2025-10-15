@@ -19,7 +19,7 @@ pub use error::RouterError;
 pub use groth_16_verifier::{Proof, PublicInputs, VerificationKey};
 
 use crate::state::{VerifierEntry, VerifierRouter};
-use crate::{Seal, Selector};
+use crate::{Seal, Selector, INITIAL_OWNER};
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::bpf_loader_upgradeable;
 use groth_16_verifier::cpi::accounts::VerifyProof;
@@ -30,6 +30,7 @@ use ownable::Ownership;
 ///
 /// # Security Considerations
 /// * Initializes a new PDA with seeds = [b"router"]
+/// * Ensures the authority matches the hard-coded initial owner to prevent front-running deployment of the router account
 /// * Requires a signing authority that will become the initial owner
 /// * Allocates space for ownership data and verifier count
 #[derive(Accounts)]
@@ -46,7 +47,10 @@ pub struct Initialize<'info> {
     pub router: Account<'info, VerifierRouter>,
 
     /// The authority initializing and paying for the router
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = authority.key() == INITIAL_OWNER @ RouterError::InvalidInitializationAuthority
+    )]
     pub authority: Signer<'info>,
 
     /// Required for account initialization

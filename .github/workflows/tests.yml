@@ -85,4 +85,4 @@ jobs:
 
       - name: Build and Test
         working-directory: ./solana-verifier
-        run: anchor test
+        run: INITIAL_OWNER=$(solana address) anchor test

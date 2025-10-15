@@ -123,7 +123,7 @@ describe("verifier-router", () => {
       generateKeyPairSigner(),
       generateKeyPairSigner(),
     ]);
-    owner = signers[0];
+    owner = deployerKeyPair;
     notOwner = signers[1];
 
     // Calculate the PDA for the Router Program

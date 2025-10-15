@@ -58,7 +58,7 @@ yarn install
 anchor keys sync
 
 # Build the programs so that IDLs are generated
-anchor build
+INITIAL_OWNER=$(solana address) anchor build
 
 # Generate client code for scripts before first run
 yarn run client
