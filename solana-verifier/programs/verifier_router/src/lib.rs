@@ -106,9 +106,4 @@ pub mod verifier_router {
         // This function checks ownership and can only be called by the owner or pending owner
         VerifierRouter::cancel_transfer(ctx)
     }
-
-    pub fn renounce_ownership(ctx: Context<VerifierRouterRenounceOwnership>) -> Result<()> {
-        // This function checks ownership and can only be called by the owner
-        VerifierRouter::renounce_ownership(ctx)
-    }
 }
