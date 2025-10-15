@@ -28,11 +28,11 @@ use crate::{Seal, Selector};
 ///
 /// NOTE: Selector value of the current zkVM version is used. If you need to use a selector from a
 /// different version of the zkVM, use the [encode_seal_with_selector](crate::encode_seal_with_selector) method instead.
-pub fn encode_seal(seal: impl AsRef<[u8]>) -> Result<Seal, ()> {
+pub fn encode_seal(seal: &[u8; 256]) -> Seal {
     let verifier_parameters_digest = Groth16ReceiptVerifierParameters::default().digest();
     let selector = &verifier_parameters_digest.as_bytes()[..4];
 
-    encode_seal_with_selector(seal, selector.try_into().map_err(|_| ())?)
+    encode_seal_with_selector(seal, selector.try_into().unwrap()) // safe to unwrap as selector is exactly 4 bytes
 }
 
 /// Encoding of a Groth16 seal by prefixing it with the given selector.
@@ -40,21 +40,16 @@ pub fn encode_seal(seal: impl AsRef<[u8]>) -> Result<Seal, ()> {
 /// The verifier selector is determined from the first 4 bytes of the hash of the verifier
 /// parameters including the Groth16 verification key and the control IDs that commit to the RISC
 /// Zero circuits.
-pub fn encode_seal_with_selector(seal: impl AsRef<[u8]>, selector: Selector) -> Result<Seal, ()> {
+pub fn encode_seal_with_selector(seal: &[u8; 256], selector: Selector) -> Seal {
     let seal = seal.as_ref();
-    if seal.len() < 256 {
-        return Err(());
-    }
 
+    // safe to unwrap as we know the seal length is 256 and can be split into these components
     let mut proof = Proof {
-        pi_a: seal[0..64].try_into().map_err(|_| ())?,
-        pi_b: seal[64..192].try_into().map_err(|_| ())?,
-        pi_c: seal[192..256].try_into().map_err(|_| ())?,
+        pi_a: seal[0..64].try_into().unwrap(),
+        pi_b: seal[64..192].try_into().unwrap(),
+        pi_c: seal[192..256].try_into().unwrap(),
     };
     proof.pi_a = negate_g1(&proof.pi_a);
 
-    Ok(Seal {
-        selector: selector.try_into().map_err(|_| ())?,
-        proof,
-    })
+    Seal { selector, proof }
 }
