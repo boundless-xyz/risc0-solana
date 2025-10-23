@@ -40,9 +40,10 @@ Full documentation for using RISC Zero, including guides for [writing zkVM progr
 
 ## Audits
 
-An audit was completed by Veridise as of commit [84a1929](https://github.com/boundless-xyz/risc0-solana/tree/84a1929bec853cd90848d2fd0b0eda001fee522d) with suggested fixes applied in [5d7f7f9](https://github.com/boundless-xyz/risc0-solana/tree/5d7f7f9cab12cbcf21d84fffc15c1bd1c89df3de).
+An audit was completed by Veridise as of commit [3be7250](https://github.com/boundless-xyz/risc0-solana/tree/3be7250bbb16d27ab7c5256b19d2ee5d151bd0a1) with suggested fixes applied in [ee41593](https://github.com/boundless-xyz/risc0-solana/tree/ee415935d04a948f27a346b563391900bdad6486).
 
-See the [full audit report](https://github.com/risc0/rz-security/blob/main/audits/contracts/veridise_solanaverifier_20240904.pdf)
+See the [full audit report](https://github.com/boundless-xyz/boundless-security/blob/879e3fb449f43636d52a07072c17f570eb2c6317/audits/2025_10_Veridise%20(Solana%20Verifier).pdf)
+
 
 [RISC Zero]: https://github.com/risc0/risc0
 [Solana]: https://solana.com
