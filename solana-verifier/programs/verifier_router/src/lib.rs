@@ -31,6 +31,10 @@ use state::*;
 
 declare_id!("6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7");
 
+/// The deployer and initial owner of the Verifier Router program is hard-coded to prevent front-running
+/// the deployment of the router account. This is set via the INITIAL_OWNER environment variable at build time.
+pub const INITIAL_OWNER: Pubkey = Pubkey::from_str_const(env!("INITIAL_OWNER"));
+
 pub type Selector = [u8; 4];
 
 /// An encoded RISC Zero proof along with a selector
@@ -105,10 +109,5 @@ pub mod verifier_router {
     pub fn cancel_transfer(ctx: Context<VerifierRouterCancelTransfer>) -> Result<()> {
         // This function checks ownership and can only be called by the owner or pending owner
         VerifierRouter::cancel_transfer(ctx)
-    }
-
-    pub fn renounce_ownership(ctx: Context<VerifierRouterRenounceOwnership>) -> Result<()> {
-        // This function checks ownership and can only be called by the owner
-        VerifierRouter::renounce_ownership(ctx)
     }
 }

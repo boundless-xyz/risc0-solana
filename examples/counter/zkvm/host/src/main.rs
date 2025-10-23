@@ -167,13 +167,16 @@ async fn increment_nonce(
 
     info!("Groth 16 proof for nonce increment transaction successfully created, submitting transaction to the program.");
 
-    let groth16_receipt = receipt
+    let seal: [u8; 256] = receipt
         .inner
         .groth16()
-        .expect("Unable to get Groth 16 proof from main receipt");
+        .expect("Unable to get Groth 16 proof from main receipt")
+        .seal
+        .clone()
+        .try_into()
+        .expect("Groth 16 proof is not 256 bytes");
 
-    let seal =
-        encode_seal(&groth16_receipt.seal).expect("Unable to generate proof from Groth Receipt");
+    let seal = encode_seal(&seal);
 
     info!("Encoded with selector: {:?}", seal.selector);
 

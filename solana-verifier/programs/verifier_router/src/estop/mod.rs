@@ -40,7 +40,6 @@ pub struct EmergencyStop<'info> {
     pub router: Account<'info, VerifierRouter>,
 
     /// The verifier entry of the program to be stopped.
-    /// This entry will be closed and refunded to the caller on successful stop
     #[account(
         mut,
         seeds = [
@@ -83,13 +82,17 @@ pub struct EmergencyStop<'info> {
 /// # Returns
 /// * `Ok(())` if the emergency stop is successful
 pub fn emergency_stop_by_owner(ctx: Context<EmergencyStop>, selector: Selector) -> Result<()> {
+    let verifier = &mut ctx.accounts.verifier_entry;
+    if verifier.estopped {
+        return Ok(()); // Already estopped, abort without further checks or emitting event
+    }
+
     // Verify the caller is Contract Owner
     ctx.accounts
         .router
         .ownership
         .assert_owner(&ctx.accounts.authority)?;
 
-    let verifier = &mut ctx.accounts.verifier_entry;
     verifier.estopped = true;
 
     emit!(EmergencyStopEvent {
@@ -132,7 +135,10 @@ pub fn emergency_stop_with_proof(
     selector: Selector,
     proof: Proof,
 ) -> Result<()> {
-    let zero_array = [0u8; 32];
+    let verifier = &mut ctx.accounts.verifier_entry;
+    if verifier.estopped {
+        return Ok(()); // Already estopped, abort without further checks or emitting event
+    }
 
     // Attempt to verify the proof
     let verifier_program = ctx.accounts.verifier_program.to_account_info();
@@ -147,9 +153,9 @@ pub fn emergency_stop_with_proof(
     //
     // > This function will not return if the called program returns anything other than success.
     // > If the callee returns an error or aborts then the entire transaction will immediately fail.
+    let zero_array = [0u8; 32];
     let _ = groth_16_verifier::cpi::verify(verify_ctx, proof, zero_array, zero_array);
 
-    let verifier = &mut ctx.accounts.verifier_entry;
     verifier.estopped = true;
 
     emit!(EmergencyStopEvent {

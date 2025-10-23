@@ -19,11 +19,10 @@ use ownable::{Ownable, Ownership};
 
 use crate::Selector;
 
-/// Main router account storing ownership and verifier count
+/// Main router account
 ///
 /// This account maintains the registry of verifiers and implements ownership controls
 /// for administrative operations.
-///
 ///
 /// # Fields
 /// * `ownership` - Stores the current and pending owner information using the Ownable trait

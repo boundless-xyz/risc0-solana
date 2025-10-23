@@ -42,15 +42,23 @@ cp example.env .env
 # Edit .env with your configuration
 ```
 
+4. Generate a new Solana keypair (if needed)
+```bash
+solana-keygen new
+```
+
+> [!IMPORTANT]
+> A Solana keypair is required to build the router so do this step even if you are not planning to deploy
+
 ### Deployment
+
 Note: Deployment accounts need at minimum a 6 SOL balance by default and
 any non-deployment actions require an account with a 1 SOL minimum balance.
-
 
 1. Deploy the router and initial verifier:
 ```bash
 anchor keys sync
-anchor build
+INITIAL_OWNER=$(solana address) anchor build
 yarn run client
 yarn run deploy
 ```
@@ -112,12 +120,6 @@ See `example.env` for full configuration options including:
 
 ## Testing
 
-Open a terminal and run a local validator:
 ```bash
-solana-test-validator -r
-```
-
-Then in another terminal run:
-```bash
-anchor test --skip-local-validator
+INITIAL_OWNER=$(solana address) anchor test
 ```
