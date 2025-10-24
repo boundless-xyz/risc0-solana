@@ -66,7 +66,7 @@ export type AddVerifierInstruction<
   InstructionWithAccounts<
     [
       TAccountRouter extends string
-        ? WritableAccount<TAccountRouter>
+        ? ReadonlyAccount<TAccountRouter>
         : TAccountRouter,
       TAccountVerifierEntry extends string
         ? WritableAccount<TAccountVerifierEntry>
@@ -183,7 +183,7 @@ export async function getAddVerifierInstructionAsync<
 
   // Original accounts.
   const originalAccounts = {
-    router: { value: input.router ?? null, isWritable: true },
+    router: { value: input.router ?? null, isWritable: false },
     verifierEntry: { value: input.verifierEntry ?? null, isWritable: true },
     verifierProgramData: {
       value: input.verifierProgramData ?? null,
@@ -326,7 +326,7 @@ export function getAddVerifierInstruction<
 
   // Original accounts.
   const originalAccounts = {
-    router: { value: input.router ?? null, isWritable: true },
+    router: { value: input.router ?? null, isWritable: false },
     verifierEntry: { value: input.verifierEntry ?? null, isWritable: true },
     verifierProgramData: {
       value: input.verifierProgramData ?? null,

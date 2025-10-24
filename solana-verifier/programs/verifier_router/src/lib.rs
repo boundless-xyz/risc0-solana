@@ -29,7 +29,7 @@ use estop::*;
 use router::*;
 use state::*;
 
-declare_id!("6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7");
+declare_id!("Aa5Dk5SX25kbWeQDZHJLDHENbdcVWA1sgayi88stSGSq");
 
 /// The deployer and initial owner of the Verifier Router program is hard-coded to prevent front-running
 /// the deployment of the router account. This is set via the INITIAL_OWNER environment variable at build time.

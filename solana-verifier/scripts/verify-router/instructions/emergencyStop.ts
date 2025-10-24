@@ -125,10 +125,7 @@ export type EmergencyStopAsyncInput<
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
   router?: Address<TAccountRouter>;
-  /**
-   * The verifier entry of the program to be stopped.
-   * This entry will be closed and refunded to the caller on successful stop
-   */
+  /** The verifier entry of the program to be stopped. */
   verifierEntry?: Address<TAccountVerifierEntry>;
   /**
    * The authority attempting the emergency stop (either the router owner OR the person presenting proof of exploit)
@@ -253,10 +250,7 @@ export type EmergencyStopInput<
 > = {
   /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
   router: Address<TAccountRouter>;
-  /**
-   * The verifier entry of the program to be stopped.
-   * This entry will be closed and refunded to the caller on successful stop
-   */
+  /** The verifier entry of the program to be stopped. */
   verifierEntry: Address<TAccountVerifierEntry>;
   /**
    * The authority attempting the emergency stop (either the router owner OR the person presenting proof of exploit)
@@ -357,10 +351,7 @@ export type ParsedEmergencyStopInstruction<
   accounts: {
     /** The router account PDA managing verifiers and required Upgrade Authority address of verifier */
     router: TAccountMetas[0];
-    /**
-     * The verifier entry of the program to be stopped.
-     * This entry will be closed and refunded to the caller on successful stop
-     */
+    /** The verifier entry of the program to be stopped. */
     verifierEntry: TAccountMetas[1];
     /**
      * The authority attempting the emergency stop (either the router owner OR the person presenting proof of exploit)

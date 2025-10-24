@@ -66,18 +66,6 @@ async function runAddVerifier() {
 
   const rpc = createRpc();
 
-  // TODO: Check who is the current authority and only call set authority if not currently set
-  logger.info("Changing Verifier Upgrade Authority to be the router program");
-
-  const routerPda = await getRouterPda(routerAddress);
-  await changeAuthority(
-    rpc.rpc,
-    rpc.rpc_subscription,
-    verifierAddress,
-    deployer,
-    routerPda.address
-  );
-
   logger.info("Adding the verifier to the Router");
   await addVerifier(
     rpc.rpc,

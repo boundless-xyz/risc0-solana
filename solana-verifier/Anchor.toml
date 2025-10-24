@@ -5,9 +5,9 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-groth_16_verifier = "THq1qFYQoh7zgcjXoMXduDBqiZRCPeg3PvvMbrVQUge"
+groth_16_verifier = "EjmsMyKrowBJMHdeEA65TKQRKszAi3Jr1YXF7ia74tyR"
 test_bad_verifier = "6UwNJdV4Q64iWHWrsTTonwhTFWTT3wg8RtzLX9fchp5W"
-verifier_router = "6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7"
+verifier_router = "Aa5Dk5SX25kbWeQDZHJLDHENbdcVWA1sgayi88stSGSq"
 
 [registry]
 url = "https://api.apr.dev"

@@ -20,13 +20,12 @@ import {
   type ParsedEmergencyStopInstruction,
   type ParsedEmergencyStopWithProofInstruction,
   type ParsedInitializeInstruction,
-  type ParsedRenounceOwnershipInstruction,
   type ParsedTransferOwnershipInstruction,
   type ParsedVerifyInstruction,
 } from '../instructions';
 
 export const VERIFIER_ROUTER_PROGRAM_ADDRESS =
-  '6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7' as Address<'6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7'>;
+  'Aa5Dk5SX25kbWeQDZHJLDHENbdcVWA1sgayi88stSGSq' as Address<'Aa5Dk5SX25kbWeQDZHJLDHENbdcVWA1sgayi88stSGSq'>;
 
 export enum VerifierRouterAccount {
   VerifierEntry,
@@ -71,7 +70,6 @@ export enum VerifierRouterInstruction {
   EmergencyStop,
   EmergencyStopWithProof,
   Initialize,
-  RenounceOwnership,
   TransferOwnership,
   Verify,
 }
@@ -150,17 +148,6 @@ export function identifyVerifierRouterInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
-        new Uint8Array([19, 143, 91, 79, 34, 168, 174, 125])
-      ),
-      0
-    )
-  ) {
-    return VerifierRouterInstruction.RenounceOwnership;
-  }
-  if (
-    containsBytes(
-      data,
-      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([65, 177, 215, 73, 53, 45, 99, 47])
       ),
       0
@@ -185,7 +172,7 @@ export function identifyVerifierRouterInstruction(
 }
 
 export type ParsedVerifierRouterInstruction<
-  TProgram extends string = '6JvFfBrvCcWgANKh1Eae9xDq4RC6cfJuBcf71rp2k9Y7',
+  TProgram extends string = 'Aa5Dk5SX25kbWeQDZHJLDHENbdcVWA1sgayi88stSGSq',
 > =
   | ({
       instructionType: VerifierRouterInstruction.AcceptOwnership;
@@ -205,9 +192,6 @@ export type ParsedVerifierRouterInstruction<
   | ({
       instructionType: VerifierRouterInstruction.Initialize;
     } & ParsedInitializeInstruction<TProgram>)
-  | ({
-      instructionType: VerifierRouterInstruction.RenounceOwnership;
-    } & ParsedRenounceOwnershipInstruction<TProgram>)
   | ({
       instructionType: VerifierRouterInstruction.TransferOwnership;
     } & ParsedTransferOwnershipInstruction<TProgram>)

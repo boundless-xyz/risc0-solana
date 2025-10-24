@@ -138,10 +138,7 @@ async function run_deployment(): Promise<void> {
   const verifier_address = await deploy_cli(
     Programs.Groth16Verifier,
     verify,
-    // Verifier should be upgradable so that router can close it
-    // In the add verifier stage, router programs becomes upgrade
-    // authority
-    true
+    false
   );
   logger.info(`Groth 16 Verifier Program Address will be: ${verifier_address}`);
 
@@ -149,16 +146,6 @@ async function run_deployment(): Promise<void> {
 
   // Initialize the Router by setting owner for the contract and creating the PDA
   await initializeRouter(rpc.rpc, rpc.rpc_subscription, routerAddress, owner);
-
-  // Setup the Groth 16 Verifiers Upgrade authority to be the Router PDA
-  const routerPda = await getRouterPda(routerAddress);
-  await changeAuthority(
-    rpc.rpc,
-    rpc.rpc_subscription,
-    verifier_address,
-    deployer,
-    routerPda.address
-  );
 
   // Add the Groth 16 Verifier to the Router
   await addVerifier(
