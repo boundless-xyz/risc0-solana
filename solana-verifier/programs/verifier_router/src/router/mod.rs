@@ -93,7 +93,6 @@ pub struct AddVerifier<'info> {
             ],
             bump,
             seeds::program = bpf_loader_upgradeable::ID,
-            constraint = verifier_program_data.upgrade_authority_address == Some(router.key()) @ RouterError::VerifierInvalidAuthority
     )]
     pub verifier_program_data: Account<'info, ProgramData>,
 

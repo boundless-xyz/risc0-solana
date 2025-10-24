@@ -14,23 +14,17 @@ import {
 } from '@solana/kit';
 import { GROTH16_VERIFIER_PROGRAM_ADDRESS } from '../programs';
 
-/** G1CompressionError: G1 compression error */
-export const GROTH16_VERIFIER_ERROR__G1_COMPRESSION_ERROR = 0x1770; // 6000
-/** G2CompressionError: G2 compression error */
-export const GROTH16_VERIFIER_ERROR__G2_COMPRESSION_ERROR = 0x1771; // 6001
 /** VerificationError: Verification error */
-export const GROTH16_VERIFIER_ERROR__VERIFICATION_ERROR = 0x1772; // 6002
+export const GROTH16_VERIFIER_ERROR__VERIFICATION_ERROR = 0x1770; // 6000
 /** InvalidPublicInput: Invalid public input */
-export const GROTH16_VERIFIER_ERROR__INVALID_PUBLIC_INPUT = 0x1773; // 6003
+export const GROTH16_VERIFIER_ERROR__INVALID_PUBLIC_INPUT = 0x1771; // 6001
 /** ArithmeticError: Arithmetic error */
-export const GROTH16_VERIFIER_ERROR__ARITHMETIC_ERROR = 0x1774; // 6004
+export const GROTH16_VERIFIER_ERROR__ARITHMETIC_ERROR = 0x1772; // 6002
 /** PairingError: Pairing error */
-export const GROTH16_VERIFIER_ERROR__PAIRING_ERROR = 0x1775; // 6005
+export const GROTH16_VERIFIER_ERROR__PAIRING_ERROR = 0x1773; // 6003
 
 export type Groth16VerifierError =
   | typeof GROTH16_VERIFIER_ERROR__ARITHMETIC_ERROR
-  | typeof GROTH16_VERIFIER_ERROR__G1_COMPRESSION_ERROR
-  | typeof GROTH16_VERIFIER_ERROR__G2_COMPRESSION_ERROR
   | typeof GROTH16_VERIFIER_ERROR__INVALID_PUBLIC_INPUT
   | typeof GROTH16_VERIFIER_ERROR__PAIRING_ERROR
   | typeof GROTH16_VERIFIER_ERROR__VERIFICATION_ERROR;
@@ -41,8 +35,6 @@ let groth16VerifierErrorMessages:
 if (process.env.NODE_ENV !== 'production') {
   groth16VerifierErrorMessages = {
     [GROTH16_VERIFIER_ERROR__ARITHMETIC_ERROR]: `Arithmetic error`,
-    [GROTH16_VERIFIER_ERROR__G1_COMPRESSION_ERROR]: `G1 compression error`,
-    [GROTH16_VERIFIER_ERROR__G2_COMPRESSION_ERROR]: `G2 compression error`,
     [GROTH16_VERIFIER_ERROR__INVALID_PUBLIC_INPUT]: `Invalid public input`,
     [GROTH16_VERIFIER_ERROR__PAIRING_ERROR]: `Pairing error`,
     [GROTH16_VERIFIER_ERROR__VERIFICATION_ERROR]: `Verification error`,

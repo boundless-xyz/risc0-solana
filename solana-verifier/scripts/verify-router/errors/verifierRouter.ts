@@ -16,40 +16,28 @@ import { VERIFIER_ROUTER_PROGRAM_ADDRESS } from '../programs';
 
 /** VerifierInvalidAuthority: Attempted to add a verifier contract that the router contract does not own and thus cannot delete */
 export const VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_AUTHORITY = 0x1770; // 6000
-/** VerifierInvalidLoader: Program provided account does not match the key in the verifier program data account */
-export const VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_LOADER = 0x1771; // 6001
-/** SelectorInvalid: Selector is not valid for this call. */
-export const VERIFIER_ROUTER_ERROR__SELECTOR_INVALID = 0x1772; // 6002
-/** SelectorNotFound: Selector not found */
-export const VERIFIER_ROUTER_ERROR__SELECTOR_NOT_FOUND = 0x1773; // 6003
 /** SelectorDeactivated: Selector has been deactivated */
-export const VERIFIER_ROUTER_ERROR__SELECTOR_DEACTIVATED = 0x1774; // 6004
+export const VERIFIER_ROUTER_ERROR__SELECTOR_DEACTIVATED = 0x1771; // 6001
 /** InvalidVerifier: Invalid verifier program */
-export const VERIFIER_ROUTER_ERROR__INVALID_VERIFIER = 0x1775; // 6005
-/** Overflow: Arithmetic overflow */
-export const VERIFIER_ROUTER_ERROR__OVERFLOW = 0x1776; // 6006
+export const VERIFIER_ROUTER_ERROR__INVALID_VERIFIER = 0x1772; // 6002
+/** InvalidInitializationAuthority: Authority used for initialization does not match the value expected by the program */
+export const VERIFIER_ROUTER_ERROR__INVALID_INITIALIZATION_AUTHORITY = 0x1773; // 6003
 
 export type VerifierRouterError =
+  | typeof VERIFIER_ROUTER_ERROR__INVALID_INITIALIZATION_AUTHORITY
   | typeof VERIFIER_ROUTER_ERROR__INVALID_VERIFIER
-  | typeof VERIFIER_ROUTER_ERROR__OVERFLOW
   | typeof VERIFIER_ROUTER_ERROR__SELECTOR_DEACTIVATED
-  | typeof VERIFIER_ROUTER_ERROR__SELECTOR_INVALID
-  | typeof VERIFIER_ROUTER_ERROR__SELECTOR_NOT_FOUND
-  | typeof VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_AUTHORITY
-  | typeof VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_LOADER;
+  | typeof VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_AUTHORITY;
 
 let verifierRouterErrorMessages:
   | Record<VerifierRouterError, string>
   | undefined;
 if (process.env.NODE_ENV !== 'production') {
   verifierRouterErrorMessages = {
+    [VERIFIER_ROUTER_ERROR__INVALID_INITIALIZATION_AUTHORITY]: `Authority used for initialization does not match the value expected by the program`,
     [VERIFIER_ROUTER_ERROR__INVALID_VERIFIER]: `Invalid verifier program`,
-    [VERIFIER_ROUTER_ERROR__OVERFLOW]: `Arithmetic overflow`,
     [VERIFIER_ROUTER_ERROR__SELECTOR_DEACTIVATED]: `Selector has been deactivated`,
-    [VERIFIER_ROUTER_ERROR__SELECTOR_INVALID]: `Selector is not valid for this call.`,
-    [VERIFIER_ROUTER_ERROR__SELECTOR_NOT_FOUND]: `Selector not found`,
     [VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_AUTHORITY]: `Attempted to add a verifier contract that the router contract does not own and thus cannot delete`,
-    [VERIFIER_ROUTER_ERROR__VERIFIER_INVALID_LOADER]: `Program provided account does not match the key in the verifier program data account`,
   };
 }
 

@@ -78,7 +78,7 @@ jobs:
           echo "/home/ubuntu/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
       - name: Create keypair for testing
-        run: solana-keygen new --no-bip39-passphrase
+        run: solana-keygen new --no-bip39-passphrase --force
 
       - name: Install Anchor CLI
         run: cargo install --git https://github.com/coral-xyz/anchor anchor-cli --tag v0.31.1

@@ -12,6 +12,5 @@ export * from './cancelTransfer';
 export * from './emergencyStop';
 export * from './emergencyStopWithProof';
 export * from './initialize';
-export * from './renounceOwnership';
 export * from './transferOwnership';
 export * from './verify';
