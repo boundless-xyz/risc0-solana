@@ -1,3 +1,5 @@
+> **Archived:** Historical source and releases for the RISC Zero Solana verifier.
+
 > [!IMPORTANT]
 > `main` is the development branch. Application developers should use the [latest release](https://github.com/risc0/risc0-solana/releases) instead.
 
